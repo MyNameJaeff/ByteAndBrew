@@ -1,4 +1,6 @@
 ﻿using Byte___Brew.Data;
+using Byte___Brew.Dtos.Menu;
+using Byte___Brew.Dtos.NewFolder; // rename this namespace to something like Byte___Brew.Dtos.MenuItem
 using Byte___Brew.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,37 +15,109 @@ namespace Byte___Brew.Controllers
         public MenuItemsController(ByteAndBrewDbContext db) => _db = db;
 
         [HttpGet]
-        public async Task<IActionResult> GetAll() => Ok(await _db.MenuItems.ToListAsync());
+        public async Task<IActionResult> GetAll()
+        {
+            var items = await _db.MenuItems.ToListAsync();
+            var dtoList = items.Select(m => new MenuItemReadDto
+            {
+                Id = m.Id,
+                Name = m.Name,
+                Description = m.Description,
+                Price = m.Price,
+                IsPopular = m.IsPopular,
+                ImageUrl = m.ImageUrl
+            }).ToList();
+
+            return Ok(dtoList);
+        }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id) =>
-            await _db.MenuItems.FindAsync(id) is MenuItem t ? Ok(t) : NotFound();
+        public async Task<IActionResult> Get(int id)
+        {
+            var m = await _db.MenuItems.FindAsync(id);
+            if (m == null) return NotFound($"The menu item with id {id} does not exist");
+
+            var dto = new MenuItemReadDto
+            {
+                Id = m.Id,
+                Name = m.Name,
+                Description = m.Description,
+                Price = m.Price,
+                IsPopular = m.IsPopular,
+                ImageUrl = m.ImageUrl
+            };
+
+            return Ok(dto);
+        }
 
         [HttpPost]
-        public async Task<IActionResult> Create(MenuItem menuItem)
+        public async Task<IActionResult> Create(MenuItemCreateDto dto)
         {
+            var existingItem = await _db.MenuItems.FirstOrDefaultAsync(m => m.Name == dto.Name);
+            if (existingItem != null) return BadRequest("Menu item with this name already exists.");
+
+            var menuItem = new MenuItem
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                Price = dto.Price,
+                IsPopular = dto.IsPopular,
+                ImageUrl = dto.ImageUrl
+            };
+
             _db.MenuItems.Add(menuItem);
             await _db.SaveChangesAsync();
-            return CreatedAtAction(nameof(Get), new { id = menuItem.Id }, menuItem);
+
+            var readDto = new MenuItemReadDto
+            {
+                Id = menuItem.Id,
+                Name = menuItem.Name,
+                Description = menuItem.Description,
+                Price = menuItem.Price,
+                IsPopular = menuItem.IsPopular,
+                ImageUrl = menuItem.ImageUrl
+            };
+
+            return CreatedAtAction(nameof(Get), new { id = menuItem.Id }, readDto);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, MenuItem menuItem)
+        public async Task<IActionResult> Update(int id, MenuItemCreateDto dto)
         {
-            if (id != menuItem.Id) return BadRequest();
-            _db.Entry(menuItem).State = EntityState.Modified;
+            var menuItem = await _db.MenuItems.FindAsync(id);
+            if (menuItem == null) return NotFound($"The menu item with id {id} does not exist");
+
+            menuItem.Name = dto.Name;
+            menuItem.Description = dto.Description;
+            menuItem.Price = dto.Price;
+            menuItem.IsPopular = dto.IsPopular;
+            menuItem.ImageUrl = dto.ImageUrl;
+
             await _db.SaveChangesAsync();
-            return NoContent();
+
+            var readDto = new MenuItemReadDto
+            {
+                Id = menuItem.Id,
+                Name = menuItem.Name,
+                Description = menuItem.Description,
+                Price = menuItem.Price,
+                IsPopular = menuItem.IsPopular,
+                ImageUrl = menuItem.ImageUrl
+            };
+
+            return Ok(new { Message = $"The menu item with id {id} has been updated.", UpdatedItem = readDto });
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var t = await _db.MenuItems.FindAsync(id);
-            if (t == null) return NotFound();
-            _db.MenuItems.Remove(t);
+            var m = await _db.MenuItems.FindAsync(id);
+            if (m == null) return NotFound($"The menu item with id {id} does not exist");
+
+            _db.MenuItems.Remove(m);
             await _db.SaveChangesAsync();
-            return NoContent();
+
+            return Ok(new { Message = $"The menu item with id {id} has been deleted." });
         }
     }
 }

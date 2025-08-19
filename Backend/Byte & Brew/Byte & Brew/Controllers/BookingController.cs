@@ -14,6 +14,7 @@ namespace Byte___Brew.Controllers
         public BookingsController(ByteAndBrewDbContext db) => _db = db;
 
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll()
         {
             var bookings = await _db.Bookings.ToListAsync();
@@ -31,11 +32,13 @@ namespace Byte___Brew.Controllers
         }
 
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Get(int id)
         {
             var booking = await _db.Bookings.FindAsync(id);
 
-            if (booking == null) return NotFound();
+            if (booking == null) return NotFound($"The booking with id {id} does not exist");
 
             var dto = new BookingReadDto
             {
@@ -50,6 +53,8 @@ namespace Byte___Brew.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create(BookingCreateDto dto)
         {
             var customer = await _db.Customers.FindAsync(dto.CustomerId);
@@ -59,6 +64,7 @@ namespace Byte___Brew.Controllers
             if (table == null) return BadRequest("Table not found.");
             if (dto.NumberOfGuests > table.Capacity)
                 return BadRequest("Too many guests for this table.");
+            else if (dto.NumberOfGuests <= 0) return BadRequest("There must be more than 0 people");
 
             var twoHoursBefore = dto.StartTime.AddHours(-2);
             var twoHoursAfter = dto.StartTime.AddHours(2);
@@ -95,22 +101,33 @@ namespace Byte___Brew.Controllers
 
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Booking booking)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> Update(int id, BookingCreateDto dto)
         {
-            if (id != booking.Id) return BadRequest();
-            _db.Entry(booking).State = EntityState.Modified;
+            var booking = await _db.Bookings.FindAsync(id);
+            if (booking == null) return NotFound($"There's no booking with id {id}");
+
+            booking.TableId = dto.TableId;
+            booking.CustomerId = dto.CustomerId;
+            booking.StartTime = dto.StartTime;
+            booking.NumberOfGuests = dto.NumberOfGuests;
+
+            // _db.Entry(dto).State = EntityState.Modified;
             await _db.SaveChangesAsync();
-            return NoContent();
+            return Ok(dto);
         }
 
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Delete(int id)
         {
             var t = await _db.Bookings.FindAsync(id);
-            if (t == null) return NotFound();
+            if (t == null) return NotFound($"The booking with id {id} does not exist");
             _db.Bookings.Remove(t);
             await _db.SaveChangesAsync();
-            return NoContent();
+            return Ok($"The booking with id {id} has been removed");
         }
     }
 }

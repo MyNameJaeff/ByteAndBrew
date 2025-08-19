@@ -15,7 +15,29 @@ namespace Byte___Brew.Controllers
         public CustomersController(ByteAndBrewDbContext db) => _db = db;
 
         [HttpGet]
-        public async Task<IActionResult> GetAll() => Ok(await _db.Customers.ToListAsync());
+        public async Task<IActionResult> GetAll()
+        {
+            var customers = await _db.Customers
+                .Include(c => c.Bookings)
+                .ToListAsync();
+
+            var dtoList = customers.Select(c => new CustomerReadDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                PhoneNumber = c.PhoneNumber,
+                Bookings = c.Bookings.Select(b => new BookingReadDto
+                {
+                    Id = b.Id,
+                    StartTime = b.StartTime,
+                    NumberOfGuests = b.NumberOfGuests,
+                    TableId = b.TableId,
+                    CustomerId = b.CustomerId
+                }).ToList()
+            }).ToList();
+
+            return Ok(dtoList);
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
@@ -24,7 +46,7 @@ namespace Byte___Brew.Controllers
                 .Include(c => c.Bookings)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
-            if (customer == null) return NotFound();
+            if (customer == null) return NotFound($"The customer with id {id} does not exist");
 
             var dto = new CustomerReadDto
             {
@@ -47,7 +69,6 @@ namespace Byte___Brew.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CustomerCreateDto dto)
         {
-            // Optional: check if a customer with the same phone number already exists
             var existingCustomer = await _db.Customers
                 .FirstOrDefaultAsync(c => c.PhoneNumber == dto.PhoneNumber);
 
@@ -63,34 +84,56 @@ namespace Byte___Brew.Controllers
             _db.Customers.Add(customer);
             await _db.SaveChangesAsync();
 
-            // Optionally, return a DTO instead of the entity
-            return CreatedAtAction(nameof(Get), new { id = customer.Id },
-                new CustomerReadDto
-                {
-                    Id = customer.Id,
-                    Name = customer.Name,
-                    PhoneNumber = customer.PhoneNumber
-                });
+            var readDto = new CustomerReadDto
+            {
+                Id = customer.Id,
+                Name = customer.Name,
+                PhoneNumber = customer.PhoneNumber,
+                Bookings = new List<BookingReadDto>()
+            };
+
+            return CreatedAtAction(nameof(Get), new { id = customer.Id }, readDto);
         }
 
-
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Customer customer)
+        public async Task<IActionResult> Update(int id, CustomerCreateDto dto)
         {
-            if (id != customer.Id) return BadRequest();
-            _db.Entry(customer).State = EntityState.Modified;
+            var customer = await _db.Customers.FindAsync(id);
+            if (customer == null) return NotFound($"The customer with id {id} does not exist");
+
+            customer.Name = dto.Name;
+            customer.PhoneNumber = dto.PhoneNumber;
+
             await _db.SaveChangesAsync();
-            return NoContent();
+
+            var readDto = new CustomerReadDto
+            {
+                Id = customer.Id,
+                Name = customer.Name,
+                PhoneNumber = customer.PhoneNumber,
+                Bookings = customer.Bookings.Select(b => new BookingReadDto
+                {
+                    Id = b.Id,
+                    StartTime = b.StartTime,
+                    NumberOfGuests = b.NumberOfGuests,
+                    TableId = b.TableId,
+                    CustomerId = b.CustomerId
+                }).ToList()
+            };
+
+            return Ok(readDto);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var t = await _db.Customers.FindAsync(id);
-            if (t == null) return NotFound();
-            _db.Customers.Remove(t);
+            var customer = await _db.Customers.FindAsync(id);
+            if (customer == null) return NotFound($"The customer with id {id} does not exist");
+
+            _db.Customers.Remove(customer);
             await _db.SaveChangesAsync();
-            return NoContent();
+
+            return Ok($"The customer with id {id} has been removed");
         }
     }
 }

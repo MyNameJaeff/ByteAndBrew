@@ -165,10 +165,10 @@ C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debu
 C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.Byte & Brew.props
 C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.Byte & Brew.props
 C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\staticwebassets.pack.json
-C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\Byte & B.6A939115.Up2Date
 C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\Byte & Brew.dll
 C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\refint\Byte & Brew.dll
 C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\Byte & Brew.pdb
 C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\Byte & Brew.genruntimeconfig.cache
 C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\ref\Byte & Brew.dll
+C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

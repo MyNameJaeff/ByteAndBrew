@@ -7,7 +7,13 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
-    "ReturnTypes": []
+    "ReturnTypes": [
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "Byte___Brew.Controllers.AdminsController",
@@ -23,7 +29,22 @@
         "IsRequired": true
       }
     ],
-    "ReturnTypes": []
+    "ReturnTypes": [
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 201
+      },
+      {
+        "Type": "Microsoft.AspNetCore.Mvc.ProblemDetails",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 400
+      }
+    ]
   },
   {
     "ContainingType": "Byte___Brew.Controllers.AdminsController",
@@ -39,7 +60,22 @@
         "IsRequired": true
       }
     ],
-    "ReturnTypes": []
+    "ReturnTypes": [
+      {
+        "Type": "Microsoft.AspNetCore.Mvc.ProblemDetails",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 404
+      },
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "Byte___Brew.Controllers.AdminsController",
@@ -60,7 +96,22 @@
         "IsRequired": true
       }
     ],
-    "ReturnTypes": []
+    "ReturnTypes": [
+      {
+        "Type": "Microsoft.AspNetCore.Mvc.ProblemDetails",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 404
+      },
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "Byte___Brew.Controllers.AdminsController",
@@ -76,7 +127,22 @@
         "IsRequired": true
       }
     ],
-    "ReturnTypes": []
+    "ReturnTypes": [
+      {
+        "Type": "Microsoft.AspNetCore.Mvc.ProblemDetails",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 404
+      },
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "Byte___Brew.Controllers.BookingsController",
@@ -86,7 +152,13 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
-    "ReturnTypes": []
+    "ReturnTypes": [
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "Byte___Brew.Controllers.BookingsController",
@@ -102,7 +174,22 @@
         "IsRequired": true
       }
     ],
-    "ReturnTypes": []
+    "ReturnTypes": [
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 201
+      },
+      {
+        "Type": "Microsoft.AspNetCore.Mvc.ProblemDetails",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 400
+      }
+    ]
   },
   {
     "ContainingType": "Byte___Brew.Controllers.BookingsController",
@@ -118,7 +205,22 @@
         "IsRequired": true
       }
     ],
-    "ReturnTypes": []
+    "ReturnTypes": [
+      {
+        "Type": "Microsoft.AspNetCore.Mvc.ProblemDetails",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 404
+      },
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "Byte___Brew.Controllers.BookingsController",
@@ -134,12 +236,27 @@
         "IsRequired": true
       },
       {
-        "Name": "booking",
-        "Type": "Byte___Brew.Models.Booking",
+        "Name": "dto",
+        "Type": "Byte___Brew.Dtos.Booking.BookingCreateDto",
         "IsRequired": true
       }
     ],
-    "ReturnTypes": []
+    "ReturnTypes": [
+      {
+        "Type": "Microsoft.AspNetCore.Mvc.ProblemDetails",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 404
+      },
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "Byte___Brew.Controllers.BookingsController",
@@ -213,8 +330,8 @@
         "IsRequired": true
       },
       {
-        "Name": "customer",
-        "Type": "Byte___Brew.Models.Customer",
+        "Name": "dto",
+        "Type": "Byte___Brew.Dtos.Customer.CustomerCreateDto",
         "IsRequired": true
       }
     ],
@@ -255,8 +372,8 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "menuItem",
-        "Type": "Byte___Brew.Models.MenuItem",
+        "Name": "dto",
+        "Type": "Byte___Brew.Dtos.NewFolder.MenuItemCreateDto",
         "IsRequired": true
       }
     ],
@@ -292,8 +409,8 @@
         "IsRequired": true
       },
       {
-        "Name": "menuItem",
-        "Type": "Byte___Brew.Models.MenuItem",
+        "Name": "dto",
+        "Type": "Byte___Brew.Dtos.NewFolder.MenuItemCreateDto",
         "IsRequired": true
       }
     ],
@@ -371,8 +488,8 @@
         "IsRequired": true
       },
       {
-        "Name": "table",
-        "Type": "Byte___Brew.Models.Table",
+        "Name": "dto",
+        "Type": "Byte___Brew.Dtos.Table.TableCreateDto",
         "IsRequired": true
       }
     ],
@@ -388,6 +505,32 @@
     "Parameters": [
       {
         "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Byte___Brew.Controllers.TablesController",
+    "Method": "GetAvailableTables",
+    "RelativePath": "api/Tables/available/{date}/{time}/{people}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "date",
+        "Type": "System.DateTime",
+        "IsRequired": true
+      },
+      {
+        "Name": "time",
+        "Type": "System.TimeSpan",
+        "IsRequired": true
+      },
+      {
+        "Name": "people",
         "Type": "System.Int32",
         "IsRequired": true
       }

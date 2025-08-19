@@ -3,32 +3,56 @@
   "WorkspaceRootPath": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\controllers\\bookingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\controllers\\bookingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\controllers\\tablescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\controllers\\tablescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\models\\booking.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\models\\booking.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\models\\table.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\models\\table.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\controllers\\customercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\controllers\\customercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\dtos\\table\\tablereaddto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\dtos\\table\\tablereaddto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\dtos\\table\\tablecreatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\dtos\\table\\tablecreatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\controllers\\menucontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\controllers\\menucontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\controllers\\tablescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\controllers\\tablescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\dtos\\customer\\customerreaddto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\dtos\\customer\\customerreaddto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\data\\byteandbrewdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\data\\byteandbrewdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\models\\menuitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\models\\menuitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\controllers\\bookingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\controllers\\bookingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\models\\customer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\models\\customer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\controllers\\customercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\controllers\\customercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\dtos\\booking\\bookingcreatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\dtos\\booking\\bookingcreatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\models\\booking.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\models\\booking.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\models\\admin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -39,20 +63,8 @@
       "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\models\\menuitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\models\\menuitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\models\\customer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\models\\customer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|c:\\users\\fredr\\source\\repos\\byteandbrew\\backend\\byte \u0026 brew\\byte \u0026 brew\\models\\table.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0C743003-3CA5-4B68-BB8B-4D86F0EA615C}|Byte \u0026 Brew\\Byte \u0026 Brew.csproj|solutionrelative:byte \u0026 brew\\models\\table.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -62,19 +74,32 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 7,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "ByteAndBrewDbContext.cs",
-              "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Data\\ByteAndBrewDbContext.cs",
-              "RelativeDocumentMoniker": "Byte \u0026 Brew\\Data\\ByteAndBrewDbContext.cs",
-              "ToolTip": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Data\\ByteAndBrewDbContext.cs",
-              "RelativeToolTip": "Byte \u0026 Brew\\Data\\ByteAndBrewDbContext.cs",
+              "DocumentIndex": 3,
+              "Title": "TableCreateDto.cs",
+              "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Dtos\\Table\\TableCreateDto.cs",
+              "RelativeDocumentMoniker": "Byte \u0026 Brew\\Dtos\\Table\\TableCreateDto.cs",
+              "ToolTip": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Dtos\\Table\\TableCreateDto.cs",
+              "RelativeToolTip": "Byte \u0026 Brew\\Dtos\\Table\\TableCreateDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-19T11:44:47.89Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "CustomerReadDto.cs",
+              "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Dtos\\Customer\\CustomerReadDto.cs",
+              "RelativeDocumentMoniker": "Byte \u0026 Brew\\Dtos\\Customer\\CustomerReadDto.cs",
+              "ToolTip": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Dtos\\Customer\\CustomerReadDto.cs",
+              "RelativeToolTip": "Byte \u0026 Brew\\Dtos\\Customer\\CustomerReadDto.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-18T07:49:54.288Z",
+              "WhenOpened": "2025-08-19T11:44:10.249Z",
               "EditorCaption": ""
             },
             {
@@ -85,92 +110,92 @@
               "RelativeDocumentMoniker": "Byte \u0026 Brew\\Controllers\\MenuController.cs",
               "ToolTip": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Controllers\\MenuController.cs",
               "RelativeToolTip": "Byte \u0026 Brew\\Controllers\\MenuController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACcAAAA3AAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAF4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-18T07:39:01.882Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "BookingController.cs",
-              "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Controllers\\BookingController.cs",
-              "RelativeDocumentMoniker": "Byte \u0026 Brew\\Controllers\\BookingController.cs",
-              "ToolTip": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Controllers\\BookingController.cs",
-              "RelativeToolTip": "Byte \u0026 Brew\\Controllers\\BookingController.cs",
-              "ViewState": "AgIAABEAAAAAAAAAAAAswCkAAAAoAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-18T07:38:48.924Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "AdminController.cs",
-              "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Controllers\\AdminController.cs",
-              "RelativeDocumentMoniker": "Byte \u0026 Brew\\Controllers\\AdminController.cs",
-              "ToolTip": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Controllers\\AdminController.cs",
-              "RelativeToolTip": "Byte \u0026 Brew\\Controllers\\AdminController.cs",
-              "ViewState": "AgIAABMAAAAAAAAAAADwvx0AAAAZAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-18T07:38:39.898Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "CustomerController.cs",
-              "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Controllers\\CustomerController.cs",
-              "RelativeDocumentMoniker": "Byte \u0026 Brew\\Controllers\\CustomerController.cs",
-              "ToolTip": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Controllers\\CustomerController.cs",
-              "RelativeToolTip": "Byte \u0026 Brew\\Controllers\\CustomerController.cs",
-              "ViewState": "AgIAABMAAAAAAAAAAADwvywAAAApAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-18T07:38:30.913Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "TablesController.cs",
-              "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Controllers\\TablesController.cs",
-              "RelativeDocumentMoniker": "Byte \u0026 Brew\\Controllers\\TablesController.cs",
-              "ToolTip": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Controllers\\TablesController.cs",
-              "RelativeToolTip": "Byte \u0026 Brew\\Controllers\\TablesController.cs",
-              "ViewState": "AgIAABMAAAAAAAAAAADwvzEAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-18T07:30:41.759Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 6,
               "Title": "MenuItem.cs",
               "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Models\\MenuItem.cs",
               "RelativeDocumentMoniker": "Byte \u0026 Brew\\Models\\MenuItem.cs",
               "ToolTip": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Models\\MenuItem.cs",
               "RelativeToolTip": "Byte \u0026 Brew\\Models\\MenuItem.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAqAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-18T07:20:45.482Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Booking.cs",
-              "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Models\\Booking.cs",
-              "RelativeDocumentMoniker": "Byte \u0026 Brew\\Models\\Booking.cs",
-              "ToolTip": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Models\\Booking.cs",
-              "RelativeToolTip": "Byte \u0026 Brew\\Models\\Booking.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 7,
+              "Title": "BookingController.cs",
+              "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Controllers\\BookingController.cs",
+              "RelativeDocumentMoniker": "Byte \u0026 Brew\\Controllers\\BookingController.cs",
+              "ToolTip": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Controllers\\BookingController.cs",
+              "RelativeToolTip": "Byte \u0026 Brew\\Controllers\\BookingController.cs",
+              "ViewState": "AgIAAEoAAAAAAAAAAAAUwF0AAAAwAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-18T07:19:56.944Z",
+              "WhenOpened": "2025-08-18T07:38:48.924Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 10,
+              "Title": "BookingCreateDto.cs",
+              "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Dtos\\Booking\\BookingCreateDto.cs",
+              "RelativeDocumentMoniker": "Byte \u0026 Brew\\Dtos\\Booking\\BookingCreateDto.cs",
+              "ToolTip": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Dtos\\Booking\\BookingCreateDto.cs",
+              "RelativeToolTip": "Byte \u0026 Brew\\Dtos\\Booking\\BookingCreateDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-19T11:01:23.69Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Table.cs",
+              "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Models\\Table.cs",
+              "RelativeDocumentMoniker": "Byte \u0026 Brew\\Models\\Table.cs",
+              "ToolTip": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Models\\Table.cs",
+              "RelativeToolTip": "Byte \u0026 Brew\\Models\\Table.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-18T07:19:20.775Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "TablesController.cs",
+              "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Controllers\\TablesController.cs",
+              "RelativeDocumentMoniker": "Byte \u0026 Brew\\Controllers\\TablesController.cs",
+              "ToolTip": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Controllers\\TablesController.cs",
+              "RelativeToolTip": "Byte \u0026 Brew\\Controllers\\TablesController.cs",
+              "ViewState": "AgIAAD8AAAAAAAAAAAAUwFIAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-18T07:30:41.759Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "TableReadDto.cs",
+              "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Dtos\\Table\\TableReadDto.cs",
+              "RelativeDocumentMoniker": "Byte \u0026 Brew\\Dtos\\Table\\TableReadDto.cs",
+              "ToolTip": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Dtos\\Table\\TableReadDto.cs",
+              "RelativeToolTip": "Byte \u0026 Brew\\Dtos\\Table\\TableReadDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-19T11:44:51.524Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
               "Title": "Customer.cs",
               "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Models\\Customer.cs",
               "RelativeDocumentMoniker": "Byte \u0026 Brew\\Models\\Customer.cs",
@@ -183,7 +208,45 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
+              "Title": "CustomerController.cs",
+              "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Controllers\\CustomerController.cs",
+              "RelativeDocumentMoniker": "Byte \u0026 Brew\\Controllers\\CustomerController.cs",
+              "ToolTip": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Controllers\\CustomerController.cs",
+              "RelativeToolTip": "Byte \u0026 Brew\\Controllers\\CustomerController.cs",
+              "ViewState": "AgIAAGoAAAAAAAAAAAAqwIsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-18T07:38:30.913Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "AdminController.cs",
+              "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Controllers\\AdminController.cs",
+              "RelativeDocumentMoniker": "Byte \u0026 Brew\\Controllers\\AdminController.cs",
+              "ToolTip": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Controllers\\AdminController.cs",
+              "RelativeToolTip": "Byte \u0026 Brew\\Controllers\\AdminController.cs",
+              "ViewState": "AgIAABUAAAAAAAAAAAAowGMAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-18T07:38:39.898Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Booking.cs",
+              "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Models\\Booking.cs",
+              "RelativeDocumentMoniker": "Byte \u0026 Brew\\Models\\Booking.cs",
+              "ToolTip": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Models\\Booking.cs",
+              "RelativeToolTip": "Byte \u0026 Brew\\Models\\Booking.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-18T07:19:56.944Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\appsettings.json",
               "RelativeDocumentMoniker": "Byte \u0026 Brew\\appsettings.json",
@@ -191,12 +254,11 @@
               "RelativeToolTip": "Byte \u0026 Brew\\appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-08-18T07:23:47.218Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-18T07:23:47.218Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 13,
               "Title": "Admin.cs",
               "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Models\\Admin.cs",
               "RelativeDocumentMoniker": "Byte \u0026 Brew\\Models\\Admin.cs",
@@ -204,12 +266,11 @@
               "RelativeToolTip": "Byte \u0026 Brew\\Models\\Admin.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-18T07:20:16.599Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-18T07:20:16.599Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 15,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Program.cs",
               "RelativeDocumentMoniker": "Byte \u0026 Brew\\Program.cs",
@@ -217,21 +278,7 @@
               "RelativeToolTip": "Byte \u0026 Brew\\Program.cs",
               "ViewState": "AgIAAAoAAAAAAAAAAAAgwBsAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-18T07:16:24.639Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "Table.cs",
-              "DocumentMoniker": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Models\\Table.cs",
-              "RelativeDocumentMoniker": "Byte \u0026 Brew\\Models\\Table.cs",
-              "ToolTip": "C:\\Users\\fredr\\source\\repos\\ByteAndBrew\\Backend\\Byte \u0026 Brew\\Byte \u0026 Brew\\Models\\Table.cs",
-              "RelativeToolTip": "Byte \u0026 Brew\\Models\\Table.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-18T07:19:20.775Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-18T07:16:24.639Z"
             }
           ]
         }

@@ -15,6 +15,7 @@ namespace Byte___Brew.Controllers
         public AdminsController(ByteAndBrewDbContext db) => _db = db;
 
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll()
         {
             var admins = await _db.Admins
@@ -29,6 +30,8 @@ namespace Byte___Brew.Controllers
         }
 
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Get(int id)
         {
             var admin = await _db.Admins
@@ -45,6 +48,8 @@ namespace Byte___Brew.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create(AdminCreateDto dto)
         {
             var existingAdmin = await _db.Admins
@@ -71,6 +76,8 @@ namespace Byte___Brew.Controllers
 
 
         [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Update(int id, AdminCreateDto dto)
         {
             var admin = await _db.Admins.FindAsync(id);
@@ -94,6 +101,8 @@ namespace Byte___Brew.Controllers
 
 
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Delete(int id)
         {
             var t = await _db.Admins.FindAsync(id);
