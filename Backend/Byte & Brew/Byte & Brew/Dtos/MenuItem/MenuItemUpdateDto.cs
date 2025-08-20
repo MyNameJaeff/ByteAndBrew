@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Byte___Brew.Dtos.NewFolder
+namespace Byte___Brew.Dtos.MenuItem
 {
-    public class MenuItemCreateDto
+    public class MenuItemUpdateDto
     {
         [Required, StringLength(100)]
         public string Name { get; set; } = default!;

@@ -62,7 +62,6 @@ namespace Byte___Brew.Controllers
 
             bool isAuthorized = User?.Identity?.IsAuthenticated ?? false;
 
-
             var dto = new TableReadDto
             {
                 Id = table.Id,
@@ -85,19 +84,24 @@ namespace Byte___Brew.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("available/{date}/{time}/{people}")]
+        [HttpGet("available")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAvailableTables(DateTime date, TimeSpan time, int people)
+        public async Task<IActionResult> GetAvailableTables([FromQuery] DateTime date, [FromQuery] TimeSpan time, [FromQuery] int people)
         {
-            var requestedStart = date.Date.Add(time);
+            if (people <= 0)
+                return BadRequest("Number of people must be greater than 0.");
 
+            var requestedStart = date.Date.Add(time);
+            var requestedEnd = requestedStart.AddHours(2);
+
+            // Find tables that have sufficient capacity and no conflicting bookings
             var availableTables = await _db.Tables
-                .Where(t => t.Capacity >= people &&
-                            !_db.Bookings.Any(b =>
-                                b.TableId == t.Id &&
-                                requestedStart >= b.StartTime.AddHours(-2) &&
-                                requestedStart < b.StartTime.AddHours(2)))
+                .Where(t => t.Capacity >= people)
+                .Where(t => !_db.Bookings.Any(b =>
+                    b.TableId == t.Id &&
+                    !(requestedEnd <= b.StartTime || requestedStart >= b.StartTime.AddHours(2))))
                 .ToListAsync();
 
             if (!availableTables.Any())
@@ -108,7 +112,8 @@ namespace Byte___Brew.Controllers
                 Id = t.Id,
                 TableNumber = t.TableNumber,
                 Capacity = t.Capacity,
-                Bookings = new List<BookingReadDto>()
+                Bookings = new List<BookingReadDto>(),
+                IsBooked = false
             }).ToList();
 
             return Ok(dtoList);
@@ -140,7 +145,8 @@ namespace Byte___Brew.Controllers
                 Id = newTable.Id,
                 TableNumber = newTable.TableNumber,
                 Capacity = newTable.Capacity,
-                Bookings = new()
+                Bookings = new List<BookingReadDto>(),
+                IsBooked = false
             };
 
             return CreatedAtAction(nameof(Get), new { id = newTable.Id }, readDto);
@@ -149,6 +155,7 @@ namespace Byte___Brew.Controllers
         [Authorize]
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Update(int id, TableCreateDto dto)
         {
@@ -157,6 +164,24 @@ namespace Byte___Brew.Controllers
                 .FirstOrDefaultAsync(t => t.Id == id);
 
             if (table == null) return NotFound($"The table with id {id} does not exist");
+
+            // Check if the new table number conflicts with existing tables
+            var existing = await _db.Tables
+                .FirstOrDefaultAsync(t => t.TableNumber == dto.TableNumber && t.Id != id);
+
+            if (existing != null)
+                return BadRequest($"Table number {dto.TableNumber} already exists.");
+
+            // Check if reducing capacity would conflict with existing bookings
+            if (dto.Capacity < table.Capacity)
+            {
+                var futureBookings = table.Bookings
+                    .Where(b => b.StartTime > DateTime.Now && b.NumberOfGuests > dto.Capacity)
+                    .ToList();
+
+                if (futureBookings.Any())
+                    return BadRequest($"Cannot reduce capacity. There are future bookings with {futureBookings.Max(b => b.NumberOfGuests)} guests.");
+            }
 
             table.TableNumber = dto.TableNumber;
             table.Capacity = dto.Capacity;
@@ -175,25 +200,35 @@ namespace Byte___Brew.Controllers
                     NumberOfGuests = b.NumberOfGuests,
                     CustomerId = b.CustomerId,
                     TableId = b.TableId
-                }).ToList()
+                }).ToList(),
+                IsBooked = table.Bookings.Any()
             };
 
-            return Ok(new { Message = $"The table with id {id} has been updated.", UpdatedTable = readDto });
+            return Ok(readDto);
         }
 
         [Authorize]
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Delete(int id)
         {
-            var table = await _db.Tables.FindAsync(id);
+            var table = await _db.Tables
+                .Include(t => t.Bookings)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
             if (table == null) return NotFound($"The table with id {id} does not exist");
+
+            // Check if there are future bookings for this table
+            var futureBookings = table.Bookings.Where(b => b.StartTime > DateTime.Now).ToList();
+            if (futureBookings.Any())
+                return BadRequest("Cannot delete table with future bookings. Cancel the bookings first.");
 
             _db.Tables.Remove(table);
             await _db.SaveChangesAsync();
 
-            return Ok(new { Message = $"The table with id {id} has been deleted." });
+            return Ok($"The table with id {id} has been deleted");
         }
     }
 }

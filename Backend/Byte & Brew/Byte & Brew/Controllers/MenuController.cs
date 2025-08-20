@@ -1,6 +1,6 @@
 ﻿using Byte___Brew.Data;
 using Byte___Brew.Dtos.Menu;
-using Byte___Brew.Dtos.NewFolder; // rename this namespace to something like Byte___Brew.Dtos.MenuItem
+using Byte___Brew.Dtos.MenuItem;
 using Byte___Brew.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -25,7 +25,7 @@
     "Parameters": [
       {
         "Name": "dto",
-        "Type": "Byte___Brew.Dtos.NewFolder.AdminCreateDto",
+        "Type": "Byte___Brew.Dtos.Admin.AdminCreateDto",
         "IsRequired": true
       }
     ],
@@ -92,7 +92,7 @@
       },
       {
         "Name": "dto",
-        "Type": "Byte___Brew.Dtos.NewFolder.AdminCreateDto",
+        "Type": "Byte___Brew.Dtos.Admin.AdminUpdateDto",
         "IsRequired": true
       }
     ],
@@ -105,6 +105,15 @@
           "text/json"
         ],
         "StatusCode": 404
+      },
+      {
+        "Type": "Microsoft.AspNetCore.Mvc.ProblemDetails",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 400
       },
       {
         "Type": "System.Void",
@@ -136,6 +145,15 @@
           "text/json"
         ],
         "StatusCode": 404
+      },
+      {
+        "Type": "Microsoft.AspNetCore.Mvc.ProblemDetails",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 400
       },
       {
         "Type": "System.Void",
@@ -169,6 +187,15 @@
         "StatusCode": 401
       },
       {
+        "Type": "Microsoft.AspNetCore.Mvc.ProblemDetails",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 400
+      },
+      {
         "Type": "System.Void",
         "MediaTypes": [],
         "StatusCode": 200
@@ -281,6 +308,15 @@
           "text/json"
         ],
         "StatusCode": 404
+      },
+      {
+        "Type": "Microsoft.AspNetCore.Mvc.ProblemDetails",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 400
       },
       {
         "Type": "System.Void",
@@ -419,7 +455,7 @@
     "Parameters": [
       {
         "Name": "dto",
-        "Type": "Byte___Brew.Dtos.NewFolder.MenuItemCreateDto",
+        "Type": "Byte___Brew.Dtos.MenuItem.MenuItemCreateDto",
         "IsRequired": true
       }
     ],
@@ -456,7 +492,7 @@
       },
       {
         "Name": "dto",
-        "Type": "Byte___Brew.Dtos.NewFolder.MenuItemCreateDto",
+        "Type": "Byte___Brew.Dtos.MenuItem.MenuItemCreateDto",
         "IsRequired": true
       }
     ],
@@ -586,6 +622,15 @@
         "StatusCode": 404
       },
       {
+        "Type": "Microsoft.AspNetCore.Mvc.ProblemDetails",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 400
+      },
+      {
         "Type": "System.Void",
         "MediaTypes": [],
         "StatusCode": 200
@@ -615,6 +660,15 @@
           "text/json"
         ],
         "StatusCode": 404
+      },
+      {
+        "Type": "Microsoft.AspNetCore.Mvc.ProblemDetails",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 400
       },
       {
         "Type": "System.Void",
@@ -626,7 +680,7 @@
   {
     "ContainingType": "Byte___Brew.Controllers.TablesController",
     "Method": "GetAvailableTables",
-    "RelativePath": "api/Tables/available/{date}/{time}/{people}",
+    "RelativePath": "api/Tables/available",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -634,20 +688,29 @@
       {
         "Name": "date",
         "Type": "System.DateTime",
-        "IsRequired": true
+        "IsRequired": false
       },
       {
         "Name": "time",
         "Type": "System.TimeSpan",
-        "IsRequired": true
+        "IsRequired": false
       },
       {
         "Name": "people",
         "Type": "System.Int32",
-        "IsRequired": true
+        "IsRequired": false
       }
     ],
     "ReturnTypes": [
+      {
+        "Type": "Microsoft.AspNetCore.Mvc.ProblemDetails",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 400
+      },
       {
         "Type": "Microsoft.AspNetCore.Mvc.ProblemDetails",
         "MediaTypes": [

@@ -1,11 +1,11 @@
 ﻿using Byte___Brew.Data;
 using Byte___Brew.Dtos.Admin;
-using Byte___Brew.Dtos.NewFolder;
 using Byte___Brew.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
@@ -17,7 +17,13 @@ namespace Byte___Brew.Controllers
     public class AdminsController : ControllerBase
     {
         private readonly ByteAndBrewDbContext _db;
-        public AdminsController(ByteAndBrewDbContext db) => _db = db;
+        private readonly IConfiguration _configuration;
+
+        public AdminsController(ByteAndBrewDbContext db, IConfiguration configuration)
+        {
+            _db = db;
+            _configuration = configuration;
+        }
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -34,7 +40,6 @@ namespace Byte___Brew.Controllers
             return Ok(admins);
         }
 
-        [Authorize]
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -53,7 +58,6 @@ namespace Byte___Brew.Controllers
             return Ok(admin);
         }
 
-        [Authorize]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -61,10 +65,15 @@ namespace Byte___Brew.Controllers
         {
             var existingAdmin = await _db.Admins
                 .FirstOrDefaultAsync(a => a.Username == dto.Username);
-            if (existingAdmin != null) return BadRequest("Admin with this username already exists.");
+            if (existingAdmin != null)
+                return BadRequest("Admin with this username already exists.");
+
+            // Validate password strength (optional but recommended)
+            if (dto.Password.Length < 6)
+                return BadRequest("Password must be at least 6 characters long.");
 
             // Hash password
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.PasswordHash);
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
             var admin = new Admin
             {
@@ -84,20 +93,31 @@ namespace Byte___Brew.Controllers
             return CreatedAtAction(nameof(Get), new { id = admin.Id }, readDto);
         }
 
-        [Authorize]
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> Update(int id, AdminCreateDto dto)
+        public async Task<IActionResult> Update(int id, AdminUpdateDto dto)
         {
             var admin = await _db.Admins.FindAsync(id);
             if (admin == null) return NotFound($"There's no admin with id {id}");
 
+            // Check if username already exists (excluding current admin)
+            var existingAdmin = await _db.Admins
+                .FirstOrDefaultAsync(a => a.Username == dto.Username && a.Id != id);
+            if (existingAdmin != null)
+                return BadRequest("Admin with this username already exists.");
+
             admin.Username = dto.Username;
 
-            // Hash new password only if a new one is provided
-            if (!string.IsNullOrWhiteSpace(dto.PasswordHash))
-                admin.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.PasswordHash);
+            // Hash new password only if provided
+            if (!string.IsNullOrWhiteSpace(dto.Password))
+            {
+                if (dto.Password.Length < 6)
+                    return BadRequest("Password must be at least 6 characters long.");
+
+                admin.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+            }
 
             await _db.SaveChangesAsync();
 
@@ -110,26 +130,36 @@ namespace Byte___Brew.Controllers
             return Ok(readDto);
         }
 
-
-        [Authorize]
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Delete(int id)
         {
-            var t = await _db.Admins.FindAsync(id);
-            if (t == null) return NotFound($"There's no admin with id {id}");
-            _db.Admins.Remove(t);
+            var admin = await _db.Admins.FindAsync(id);
+            if (admin == null) return NotFound($"There's no admin with id {id}");
+
+            // Prevent deletion of the last admin
+            var adminCount = await _db.Admins.CountAsync();
+            if (adminCount <= 1)
+                return BadRequest("Cannot delete the last admin. There must always be at least one admin.");
+
+            _db.Admins.Remove(admin);
             await _db.SaveChangesAsync();
+
             return Ok($"The admin with id {id} has been deleted");
         }
 
         [AllowAnonymous]
         [HttpPost("login")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Login(AdminLoginDto dto)
         {
+            if (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrWhiteSpace(dto.Password))
+                return BadRequest("Username and password are required.");
+
             var admin = await _db.Admins.FirstOrDefaultAsync(a => a.Username == dto.Username);
             if (admin == null) return Unauthorized("Invalid credentials");
 
@@ -137,28 +167,42 @@ namespace Byte___Brew.Controllers
             if (!isValid) return Unauthorized("Invalid credentials");
 
             // Generate JWT
-            var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(HttpContext.RequestServices
-                .GetRequiredService<IConfiguration>()["Jwt:Key"]);
+            var jwt = GenerateJwtToken(admin);
+
+            return Ok(new
+            {
+                token = jwt,
+                adminId = admin.Id,
+                username = admin.Username,
+                expiresAt = DateTime.UtcNow.AddHours(2)
+            });
+        }
+
+        private string GenerateJwtToken(Admin admin)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]
+                ?? Environment.GetEnvironmentVariable("JWT_KEY")
+                ?? throw new InvalidOperationException("JWT key not configured"));
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim(ClaimTypes.Name, admin.Username),
-                    new Claim("AdminId", admin.Id.ToString())
+                    new Claim("AdminId", admin.Id.ToString()),
+                    new Claim(ClaimTypes.Role, "Admin")
                 }),
                 Expires = DateTime.UtcNow.AddHours(2),
-                Issuer = HttpContext.RequestServices.GetRequiredService<IConfiguration>()["Jwt:Issuer"],
-                Audience = HttpContext.RequestServices.GetRequiredService<IConfiguration>()["Jwt:Audience"],
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
+                Issuer = _configuration["Jwt:Issuer"] ?? Environment.GetEnvironmentVariable("JWT_ISSUER"),
+                Audience = _configuration["Jwt:Audience"] ?? Environment.GetEnvironmentVariable("JWT_AUDIENCE"),
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            var jwt = tokenHandler.WriteToken(token);
-
-            return Ok(new { token = jwt });
+            return tokenHandler.WriteToken(token);
         }
     }
 }

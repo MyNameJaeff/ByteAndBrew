@@ -2,13 +2,13 @@
 
 namespace Byte___Brew.Dtos.Admin
 {
-    public class AdminCreateDto
+    public class AdminUpdateDto
     {
         [Required, StringLength(50)]
         public string Username { get; set; } = default!;
 
-        [Required, StringLength(255)]
+        [StringLength(255)]
         [DataType(DataType.Password)]
-        public string Password { get; set; } = default!;
+        public string? Password { get; set; } // Optional for updates
     }
 }

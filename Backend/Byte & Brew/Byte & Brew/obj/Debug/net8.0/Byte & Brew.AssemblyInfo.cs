@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Byte & Brew")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8cf1f7282d76bcdef053a5fa65f7a4212b593c72")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+32e48ac093b423a36ca9f9543dfe1fe9c920a39f")]
 [assembly: System.Reflection.AssemblyProductAttribute("Byte & Brew")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Byte & Brew")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
