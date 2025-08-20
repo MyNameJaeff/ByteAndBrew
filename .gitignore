@@ -1,5 +1,16 @@
-Backend/Byte & Brew/Byte & Brew/bin/Debug/net8.0/appsettings.json
-Backend/Byte & Brew/Byte & Brew/appsettings.json
+# Ignore appsettings with secrets
+appsettings*.json
 
-# Visual Studio
+# Ignore Visual Studio files
 .vs/
+bin/
+obj/
+*.user
+*.suo
+*.cache
+
+# Ignore JetBrains Rider files (if any)
+.idea/
+
+# Ignore node_modules if you have any frontend code
+node_modules/
