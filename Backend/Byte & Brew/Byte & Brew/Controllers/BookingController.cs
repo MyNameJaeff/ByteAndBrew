@@ -1,6 +1,7 @@
 ﻿using Byte___Brew.Data;
 using Byte___Brew.Dtos.Booking;
 using Byte___Brew.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +14,7 @@ namespace Byte___Brew.Controllers
         private readonly ByteAndBrewDbContext _db;
         public BookingsController(ByteAndBrewDbContext db) => _db = db;
 
+        [AllowAnonymous]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll()
@@ -31,6 +33,7 @@ namespace Byte___Brew.Controllers
             return Ok(dtoList);
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -52,6 +55,7 @@ namespace Byte___Brew.Controllers
             return Ok(dto);
         }
 
+        [Authorize]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -99,7 +103,7 @@ namespace Byte___Brew.Controllers
             return CreatedAtAction(nameof(Get), new { id = booking.Id }, readDto);
         }
 
-
+        [Authorize]
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -107,6 +111,16 @@ namespace Byte___Brew.Controllers
         {
             var booking = await _db.Bookings.FindAsync(id);
             if (booking == null) return NotFound($"There's no booking with id {id}");
+
+            // Checks if the time is available
+            var twoHoursBefore = dto.StartTime.AddHours(-2);
+            var twoHoursAfter = dto.StartTime.AddHours(2);
+            bool overlap = await _db.Bookings
+                .AnyAsync(b => b.TableId == dto.TableId &&
+                   b.StartTime >= twoHoursBefore &&
+                   b.StartTime <= twoHoursAfter);
+
+            if (overlap) return BadRequest("Table not available.");
 
             booking.TableId = dto.TableId;
             booking.CustomerId = dto.CustomerId;
@@ -118,6 +132,7 @@ namespace Byte___Brew.Controllers
             return Ok(dto);
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]

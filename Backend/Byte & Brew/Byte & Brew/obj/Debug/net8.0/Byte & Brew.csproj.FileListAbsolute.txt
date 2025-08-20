@@ -159,12 +159,6 @@ C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debu
 C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\staticwebassets.build.endpoints.json
-C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\staticwebassets\msbuild.Byte & Brew.Microsoft.AspNetCore.StaticWebAssets.props
-C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\staticwebassets\msbuild.Byte & Brew.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
-C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\staticwebassets\msbuild.build.Byte & Brew.props
-C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.Byte & Brew.props
-C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.Byte & Brew.props
-C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\staticwebassets.pack.json
 C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\Byte & B.6A939115.Up2Date
 C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\Byte & Brew.dll
 C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\refint\Byte & Brew.dll
@@ -172,3 +166,9 @@ C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debu
 C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\Byte & Brew.genruntimeconfig.cache
 C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\ref\Byte & Brew.dll
 C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\rpswa.dswa.cache.json
+C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\rjimswa.dswa.cache.json
+C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
+C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
+C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\obj\Debug\net8.0\staticwebassets.build.json.cache
+C:\Users\fredr\source\repos\ByteAndBrew\Backend\Byte & Brew\Byte & Brew\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll

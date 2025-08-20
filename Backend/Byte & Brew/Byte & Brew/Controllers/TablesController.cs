@@ -2,6 +2,7 @@
 using Byte___Brew.Dtos.Booking;
 using Byte___Brew.Dtos.Table;
 using Byte___Brew.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,7 @@ namespace Byte___Brew.Controllers
         private readonly ByteAndBrewDbContext _db;
         public TablesController(ByteAndBrewDbContext db) => _db = db;
 
+        [AllowAnonymous]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll()
@@ -22,24 +24,31 @@ namespace Byte___Brew.Controllers
                 .Include(t => t.Bookings)
                 .ToListAsync();
 
+            bool isAuthorized = User?.Identity?.IsAuthenticated ?? false;
+
             var dtoList = tables.Select(t => new TableReadDto
             {
                 Id = t.Id,
                 TableNumber = t.TableNumber,
                 Capacity = t.Capacity,
-                Bookings = t.Bookings.Select(b => new BookingReadDto
-                {
-                    Id = b.Id,
-                    StartTime = b.StartTime,
-                    NumberOfGuests = b.NumberOfGuests,
-                    CustomerId = b.CustomerId,
-                    TableId = b.TableId
-                }).ToList()
+                Bookings = isAuthorized
+                    ? t.Bookings.Select(b => new BookingReadDto
+                    {
+                        Id = b.Id,
+                        StartTime = b.StartTime,
+                        NumberOfGuests = b.NumberOfGuests,
+                        CustomerId = b.CustomerId,
+                        TableId = b.TableId
+                    }).ToList()
+                    : new List<BookingReadDto>(),
+
+                IsBooked = t.Bookings.Any()
             }).ToList();
 
             return Ok(dtoList);
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -51,39 +60,49 @@ namespace Byte___Brew.Controllers
 
             if (table == null) return NotFound($"The table with id {id} does not exist");
 
+            bool isAuthorized = User?.Identity?.IsAuthenticated ?? false;
+
+
             var dto = new TableReadDto
             {
                 Id = table.Id,
                 TableNumber = table.TableNumber,
                 Capacity = table.Capacity,
-                Bookings = table.Bookings.Select(b => new BookingReadDto
-                {
-                    Id = b.Id,
-                    StartTime = b.StartTime,
-                    NumberOfGuests = b.NumberOfGuests,
-                    CustomerId = b.CustomerId,
-                    TableId = b.TableId
-                }).ToList()
+                Bookings = isAuthorized
+                    ? table.Bookings.Select(b => new BookingReadDto
+                    {
+                        Id = b.Id,
+                        StartTime = b.StartTime,
+                        NumberOfGuests = b.NumberOfGuests,
+                        CustomerId = b.CustomerId,
+                        TableId = b.TableId
+                    }).ToList()
+                    : new List<BookingReadDto>(),
+                IsBooked = table.Bookings.Any()
             };
 
             return Ok(dto);
         }
 
+        [AllowAnonymous]
         [HttpGet("available/{date}/{time}/{people}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAvailableTables(DateTime date, TimeSpan time, int people)
         {
-            var startTime = date.Date.Add(time);
-            var endTime = startTime.AddHours(2);
+            var requestedStart = date.Date.Add(time);
+
             var availableTables = await _db.Tables
                 .Where(t => t.Capacity >= people &&
-                            !_db.Bookings.Any(b => b.TableId == t.Id &&
-                                                   b.StartTime < endTime &&
-                                                   b.StartTime >= startTime))
+                            !_db.Bookings.Any(b =>
+                                b.TableId == t.Id &&
+                                requestedStart >= b.StartTime.AddHours(-2) &&
+                                requestedStart < b.StartTime.AddHours(2)))
                 .ToListAsync();
+
             if (!availableTables.Any())
                 return NotFound("No available tables found for the specified criteria.");
+
             var dtoList = availableTables.Select(t => new TableReadDto
             {
                 Id = t.Id,
@@ -91,9 +110,11 @@ namespace Byte___Brew.Controllers
                 Capacity = t.Capacity,
                 Bookings = new List<BookingReadDto>()
             }).ToList();
+
             return Ok(dtoList);
         }
 
+        [Authorize]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -125,6 +146,7 @@ namespace Byte___Brew.Controllers
             return CreatedAtAction(nameof(Get), new { id = newTable.Id }, readDto);
         }
 
+        [Authorize]
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -159,6 +181,7 @@ namespace Byte___Brew.Controllers
             return Ok(new { Message = $"The table with id {id} has been updated.", UpdatedTable = readDto });
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]

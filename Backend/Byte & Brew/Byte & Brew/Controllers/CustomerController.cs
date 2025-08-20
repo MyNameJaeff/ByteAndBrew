@@ -2,6 +2,7 @@
 using Byte___Brew.Dtos.Booking;
 using Byte___Brew.Dtos.Customer;
 using Byte___Brew.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,7 @@ namespace Byte___Brew.Controllers
         private readonly ByteAndBrewDbContext _db;
         public CustomersController(ByteAndBrewDbContext db) => _db = db;
 
+        [Authorize] // Only admins should get the customers info to stop others from accesing them
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -39,6 +41,7 @@ namespace Byte___Brew.Controllers
             return Ok(dtoList);
         }
 
+        [Authorize] // Only admins should get the customers info to stop others from accesing them
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -66,6 +69,7 @@ namespace Byte___Brew.Controllers
             return Ok(dto);
         }
 
+        [AllowAnonymous] // Thinking if the users are allowed to create a customer (might change depending on)
         [HttpPost]
         public async Task<IActionResult> Create(CustomerCreateDto dto)
         {
@@ -95,6 +99,7 @@ namespace Byte___Brew.Controllers
             return CreatedAtAction(nameof(Get), new { id = customer.Id }, readDto);
         }
 
+        [Authorize] // Should customers be allowed to change their information? (no login means others could change theirs :/
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, CustomerCreateDto dto)
         {
@@ -124,6 +129,7 @@ namespace Byte___Brew.Controllers
             return Ok(readDto);
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

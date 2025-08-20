@@ -2,6 +2,7 @@
 using Byte___Brew.Dtos.Menu;
 using Byte___Brew.Dtos.NewFolder; // rename this namespace to something like Byte___Brew.Dtos.MenuItem
 using Byte___Brew.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,7 @@ namespace Byte___Brew.Controllers
         private readonly ByteAndBrewDbContext _db;
         public MenuItemsController(ByteAndBrewDbContext db) => _db = db;
 
+        [AllowAnonymous] // Everyone should be able to view the menu
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -31,6 +33,7 @@ namespace Byte___Brew.Controllers
             return Ok(dtoList);
         }
 
+        [AllowAnonymous] // Everyone should be able to view the menu
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -50,6 +53,7 @@ namespace Byte___Brew.Controllers
             return Ok(dto);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Create(MenuItemCreateDto dto)
         {
@@ -81,6 +85,7 @@ namespace Byte___Brew.Controllers
             return CreatedAtAction(nameof(Get), new { id = menuItem.Id }, readDto);
         }
 
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, MenuItemCreateDto dto)
         {
@@ -108,6 +113,7 @@ namespace Byte___Brew.Controllers
             return Ok(new { Message = $"The menu item with id {id} has been updated.", UpdatedItem = readDto });
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
