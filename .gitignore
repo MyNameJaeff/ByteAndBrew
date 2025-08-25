@@ -1,6 +1,6 @@
 # Ignore appsettings with secrets
-appsettings*.json
-/Backend/Byte & Brew/Byte & Brew/appsettings*.json
+#appsettings*.json
+#/Backend/Byte & Brew/Byte & Brew/appsettings*.json
 
 # Ignore Visual Studio files
 .vs/
