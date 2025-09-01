@@ -1,0 +1,25 @@
+﻿@*
+Utveckla menysidan
+Skapa en sida där besökare kan se hela menyn:
+Hämta och visa dynamiskt alla rätter från API:et, inklusive namn, pris, beskrivning och eventuell bild (BildUrl).
+Menysidan ska presenteras på ett tydligt och attraktivt sätt, anpassat till ditt tema.
+*@
+
+@model IEnumerable<dynamic>
+@{
+   Layout = "_Layout";
+   ViewData["Title"] = "Menu";
+}
+
+<h1>Our Menu</h1>
+<ul>
+   @foreach (var item in Model)
+   {
+       <li>
+           <div>
+               @item.Name - @item.Price SEK
+           </div>
+           <img alt="@($"{item.Name}Image")" src="@item.ImageUrl" />
+       </li>
+   }
+</ul>
