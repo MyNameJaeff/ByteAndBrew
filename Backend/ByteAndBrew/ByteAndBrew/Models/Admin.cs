@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Byte___Brew.Models
+namespace ByteAndBrew.Models
 {
     public class Admin
     {

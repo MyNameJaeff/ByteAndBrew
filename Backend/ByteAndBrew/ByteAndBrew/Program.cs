@@ -1,11 +1,11 @@
-using Byte___Brew.Data;
-using Byte___Brew.Models;
+using ByteAndBrew.Data;
+using ByteAndBrew.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace Byte___Brew
+namespace ByteAndBrew
 {
     public class Program
     {
@@ -15,6 +15,25 @@ namespace Byte___Brew
 
             builder.Services.AddDbContext<ByteAndBrewDbContext>(opt =>
                 opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            // Configure HttpClient to bypass SSL validation in development
+            builder.Services.AddHttpClient("ByteAndBrewAPI", client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7145/api/");
+            })
+            .ConfigurePrimaryHttpMessageHandler(() =>
+            {
+                var handler = new HttpClientHandler();
+
+                // Only bypass SSL validation in development environment
+                if (builder.Environment.IsDevelopment())
+                {
+                    handler.ServerCertificateCustomValidationCallback =
+                        (message, cert, chain, errors) => true;
+                }
+
+                return handler;
+            });
 
             // Read JWT settings from environment variables, fallback to appsettings.json
             var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
@@ -88,7 +107,6 @@ namespace Byte___Brew
 
             builder.Services.AddAuthorization();
 
-            // Changed
             builder.Services.AddControllersWithViews()
                    .AddRazorRuntimeCompilation();
 
@@ -125,7 +143,7 @@ namespace Byte___Brew
                                 new MenuItem { Name="Americano", Price=35, Description="Espresso diluted with hot water", IsPopular=false, ImageUrl="https://johanochnystrom.se/cdn/shop/articles/johannystrom_americano.jpg?v=1683879013" },
                                 new MenuItem { Name="Flat White", Price=42, Description="Espresso with velvety steamed milk", IsPopular=false, ImageUrl="https://www.foodandwine.com/thmb/xQZv2CX6FO5331PYK7uGPF1we9Q=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/Partners-Flat-White-FT-BLOG0523-b11f6273c2d84462954c2163d6a1076d.jpg" },
                                 new MenuItem { Name="Iced Coffee", Price=38, Description="Cold brewed coffee over ice", IsPopular=true, ImageUrl="https://cdn.loveandlemons.com/wp-content/uploads/2025/05/how-to-make-iced-coffee-at-home.jpg" },
-                                new MenuItem { Name="Macchiato", Price=36, Description="Espresso with a small amount of foam", IsPopular=false, ImageUrl="https://gospecialtycoffee.com/medialibrary/2023/02/everything-you-need-to-know-about-macchiato-bfcoffee77.jpg" },
+                                new MenuItem { Name="Macchiato", Price=36, Description="Espresso with a small amount of foam", IsPopular=false, ImageUrl="https://coffeegeek.com/wp-content/uploads/2021/05/macchiatotraditonal-11.jpg" },
                                 new MenuItem { Name="Chai Latte", Price=44, Description="Spiced tea with steamed milk", IsPopular=true, ImageUrl="https://cdn.loveandlemons.com/wp-content/uploads/2025/01/chai-latte.jpg" },
                                 new MenuItem { Name="Hot Chocolate", Price=40, Description="Rich chocolate drink with whipped cream", IsPopular=true, ImageUrl="https://ichef.bbci.co.uk/food/ic/food_16x9_1600/recipes/hot_chocolate_78843_16x9.jpg" }
                             };
@@ -164,9 +182,20 @@ namespace Byte___Brew
                 app.UseSwaggerUI();
             }
 
+            // Use exception handling in development
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage(); 
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+
             app.UseHttpsRedirection();
 
-            // Changed
             app.UseStaticFiles();
 
             app.UseRouting();
@@ -178,8 +207,7 @@ namespace Byte___Brew
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
-            app.MapControllers(); // Keep API routes working
-
+            app.MapControllers();
 
             app.Run();
         }

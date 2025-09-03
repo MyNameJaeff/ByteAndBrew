@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Byte___Brew.Dtos.MenuItem
+namespace ByteAndBrew.Dtos.MenuItem
 {
     public class MenuItemUpdateDto
     {

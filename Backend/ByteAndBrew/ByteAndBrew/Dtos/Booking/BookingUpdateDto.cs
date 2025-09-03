@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Byte___Brew.Dtos.Booking
+namespace ByteAndBrew.Dtos.Booking
 {
     public class BookingUpdateDto
     {

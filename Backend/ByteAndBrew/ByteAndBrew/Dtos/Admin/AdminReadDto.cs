@@ -1,4 +1,4 @@
-﻿namespace Byte___Brew.Dtos.Admin
+﻿namespace ByteAndBrew.Dtos.Admin
 {
     public class AdminReadDto
     {

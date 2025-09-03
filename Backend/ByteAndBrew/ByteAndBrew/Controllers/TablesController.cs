@@ -1,12 +1,12 @@
-﻿using Byte___Brew.Data;
-using Byte___Brew.Dtos.Booking;
-using Byte___Brew.Dtos.Table;
-using Byte___Brew.Models;
+﻿using ByteAndBrew.Data;
+using ByteAndBrew.Dtos.Booking;
+using ByteAndBrew.Dtos.Table;
+using ByteAndBrew.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Byte___Brew.Controllers
+namespace ByteAndBrew.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

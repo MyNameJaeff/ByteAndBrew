@@ -1,15 +1,62 @@
-﻿@*     
-Skapa landningssidan (Home)
-Skapa en startsida som välkomnar besökaren och presenterar din restaurang:
-En kort introduktion om restaurangen, kaféet eller bageriet – exempelvis koncept, känsla eller specialitet.
-Visa några av de mest populära rätterna/dryckerna från menyn, inklusive bilder om BildUrl
- finns.
-*@
-
+﻿@model List<ByteAndBrew.Models.MenuItem>
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Home";
 }
 
-<h1>Welcome to Byte & Brew!</h1>
-<p>This is the MVC homepage.</p>
+<div class="bg-gradient-to-br from-amber-800 to-yellow-600 text-white py-20 px-4 mb-16">
+    <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-5xl md:text-6xl font-bold mb-6 drop-shadow-lg">
+            Welcome to Byte & Brew!
+        </h1>
+        <p class="text-xl md:text-2xl mb-10 leading-relaxed opacity-90 max-w-3xl mx-auto">
+            Discover our cozy atmosphere where technology meets tradition.
+            We're passionate about crafting the perfect cup while providing
+            a space where coffee lovers and tech enthusiasts can connect.
+        </p>
+        <div class="flex flex-wrap justify-center gap-8 md:gap-12">
+            <div class="flex flex-col items-center">
+                <i class="fas fa-coffee text-4xl mb-3"></i>
+                <span class="font-medium text-lg">Premium Coffee</span>
+            </div>
+            <div class="flex flex-col items-center">
+                <i class="fas fa-wifi text-4xl mb-3"></i>
+                <span class="font-medium text-lg">Free WiFi</span>
+            </div>
+            <div class="flex flex-col items-center">
+                <i class="fas fa-laptop-code text-4xl mb-3"></i>
+                <span class="font-medium text-lg">Work-Friendly</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="px-4 pb-16">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl md:text-5xl font-semibold text-gray-800 mb-4">
+                Our Popular Menu Items
+            </h2>
+            <p class="text-xl text-gray-600 italic">
+                Handcrafted with love, served with passion
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
+            @foreach (var item in Model)
+            {
+                @await Html.PartialAsync("_MenuItemCard", item)
+            }
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-16">
+                <i class="fas fa-coffee text-6xl text-amber-800 mb-6"></i>
+                <p class="text-xl text-gray-600">
+                    No menu items available at the moment. Check back soon!
+                </p>
+            </div>
+        }
+    </div>
+</section>

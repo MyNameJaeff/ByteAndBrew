@@ -1,7 +1,7 @@
-﻿using Byte___Brew.Models;
+﻿using ByteAndBrew.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Byte___Brew.Data
+namespace ByteAndBrew.Data
 {
     public class ByteAndBrewDbContext : DbContext
     {

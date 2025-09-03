@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Byte___Brew.Controllers
+namespace ByteAndBrew.Controllers
 {
     public class AdminPanelController : Controller
     {

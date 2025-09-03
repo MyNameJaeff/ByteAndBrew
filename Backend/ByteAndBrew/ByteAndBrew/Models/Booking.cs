@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Byte___Brew.Models
+namespace ByteAndBrew.Models
 {
     public class Booking
     {

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Byte___Brew.Migrations
+namespace ByteAndBrew.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration

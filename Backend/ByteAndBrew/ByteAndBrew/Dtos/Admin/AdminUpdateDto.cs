@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Byte___Brew.Dtos.Admin
+namespace ByteAndBrew.Dtos.Admin
 {
     public class AdminUpdateDto
     {

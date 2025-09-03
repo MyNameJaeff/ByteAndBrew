@@ -1,12 +1,12 @@
-﻿using Byte___Brew.Data;
-using Byte___Brew.Dtos.Menu;
-using Byte___Brew.Dtos.MenuItem;
-using Byte___Brew.Models;
+﻿using ByteAndBrew.Data;
+using ByteAndBrew.Dtos.Menu;
+using ByteAndBrew.Dtos.MenuItem;
+using ByteAndBrew.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Byte___Brew.Controllers
+namespace ByteAndBrew.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -30,6 +30,27 @@ namespace Byte___Brew.Controllers
                 ImageUrl = m.ImageUrl
             }).ToList();
 
+            return Ok(dtoList);
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("popular")]
+        public async Task<IActionResult> GetPopularItems()
+        {
+            var popularItems = await _db.MenuItems
+                .Where(m => m.IsPopular)
+                .Where(m => m.ImageUrl != null) // Ensure there's an image to show for popular items
+                .ToListAsync();
+            var dtoList = popularItems.Select(m => new MenuItemReadDto
+            {
+                Id = m.Id,
+                Name = m.Name,
+                Description = m.Description,
+                Price = m.Price,
+                IsPopular = m.IsPopular,
+                ImageUrl = m.ImageUrl
+            }).ToList();
             return Ok(dtoList);
         }
 
@@ -130,29 +151,19 @@ namespace Byte___Brew.Controllers
     // Everything below is for MVC view rendering, not API
     public class MenuController : Controller
     {
-        private readonly ByteAndBrewDbContext _db;
-
-        public MenuController(ByteAndBrewDbContext db)
+        private readonly HttpClient _client;
+        public MenuController(IHttpClientFactory clientFactory)
         {
-            _db = db;
+            _client = clientFactory.CreateClient("ByteAndBrewAPI");
         }
 
         public async Task<IActionResult> Index()
         {
-            // Fetch menu items from DB and map to DTO
-            var menuItems = await _db.MenuItems
-                .Select(m => new MenuItemReadDto
-                {
-                    Id = m.Id,
-                    Name = m.Name,
-                    Description = m.Description,
-                    Price = m.Price,
-                    IsPopular = m.IsPopular,
-                    ImageUrl = m.ImageUrl
-                })
-                .ToListAsync();
+            var response = await _client.GetAsync("MenuItems");
 
-            return View(menuItems);
+            var popularItems = await response.Content.ReadFromJsonAsync<List<MenuItem>>();
+
+            return View(popularItems);
         }
     }
 }

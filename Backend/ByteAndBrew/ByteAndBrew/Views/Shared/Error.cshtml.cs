@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace ByteAndBrew.Views.Home
+namespace ByteAndBrew.Views.Shared
 {
-    public class IndexModel : PageModel
+    public class ErrorModel : PageModel
     {
         public void OnGet()
         {

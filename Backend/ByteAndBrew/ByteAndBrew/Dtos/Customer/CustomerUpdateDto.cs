@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Byte___Brew.Dtos.Customer
+namespace ByteAndBrew.Dtos.Customer
 {
     public class CustomerUpdateDto
     {

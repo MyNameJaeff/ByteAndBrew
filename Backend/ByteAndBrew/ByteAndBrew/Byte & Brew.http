@@ -1,6 +1,6 @@
-@Byte___Brew_HostAddress = http://localhost:5049
+@ByteAndBrew_HostAddress = http://localhost:5049
 
-GET {{Byte___Brew_HostAddress}}/weatherforecast/
+GET {{ByteAndBrew_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###

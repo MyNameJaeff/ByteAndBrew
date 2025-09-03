@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Byte___Brew.Views.Shared
+namespace ByteAndBrew.Views.Shared
 {
     public class _LayoutModel : PageModel
     {

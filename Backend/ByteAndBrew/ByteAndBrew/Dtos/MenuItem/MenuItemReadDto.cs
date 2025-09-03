@@ -1,4 +1,4 @@
-﻿namespace Byte___Brew.Dtos.Menu
+﻿namespace ByteAndBrew.Dtos.Menu
 {
     public class MenuItemReadDto
     {

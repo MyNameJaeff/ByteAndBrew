@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Byte___Brew.Migrations
+namespace ByteAndBrew.Migrations
 {
     /// <inheritdoc />
     public partial class SeedAdmin : Migration

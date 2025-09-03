@@ -1,6 +1,6 @@
-﻿using Byte___Brew.Dtos.Booking;
+﻿using ByteAndBrew.Dtos.Booking;
 
-namespace Byte___Brew.Dtos.Table
+namespace ByteAndBrew.Dtos.Table
 {
     public class TableReadDto
     {

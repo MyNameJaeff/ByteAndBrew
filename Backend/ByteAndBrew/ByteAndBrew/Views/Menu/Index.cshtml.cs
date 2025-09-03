@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Byte___Brew.Views.Menu
+namespace ByteAndBrew.Views.Menu
 {
     public class IndexModel : PageModel
     {

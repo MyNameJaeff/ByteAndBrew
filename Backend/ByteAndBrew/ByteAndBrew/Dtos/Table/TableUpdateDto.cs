@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Byte___Brew.Dtos.Table
+namespace ByteAndBrew.Dtos.Table
 {
     public class TableUpdateDto
     {
