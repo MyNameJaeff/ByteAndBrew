@@ -1,0 +1,155 @@
+﻿@model List<ByteAndBrew.Models.Table>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Manage Tables";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Manage Tables</h1>
+        <div>
+            <a asp-controller="AdminPanel" asp-action="CreateTable" class="btn btn-warning">
+                <i class="fas fa-plus"></i> Add Table
+            </a>
+            <a asp-controller="AdminPanel" asp-action="Dashboard" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @ViewBag.Error
+        </div>
+    }
+
+    <div class="card shadow">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">Restaurant Tables (@Model.Count)</h5>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="row">
+                    @foreach (var table in Model.OrderBy(t => t.TableNumber))
+                    {
+                        <div class="col-md-6 col-lg-4 col-xl-3 mb-4">
+                            <div class="card h-100 border-warning">
+                                <div class="card-body text-center">
+                                    <div class="mb-3">
+                                        <i class="fas fa-chair fa-2x text-warning"></i>
+                                    </div>
+                                    <h5 class="card-title">Table @table.TableNumber</h5>
+                                    <p class="card-text">
+                                        <span class="badge bg-primary fs-6">@table.Capacity seats</span>
+                                    </p>
+                                    <div class="btn-group w-100" role="group">
+                                        <a asp-controller="AdminPanel" asp-action="EditTable" asp-route-id="@table.Id"
+                                           class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger btn-sm"
+                                                data-bs-toggle="modal" data-bs-target="#deleteModal@(table.Id)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Delete Modal -->
+                                <div class="modal fade" id="deleteModal@(table.Id)" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Confirm Delete</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Are you sure you want to delete <strong>Table @table.TableNumber</strong>?
+                                                <br><small class="text-muted">This action cannot be undone and may affect existing bookings.</small>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <form asp-controller="AdminPanel" asp-action="DeleteTable" method="post" class="d-inline">
+                                                    <input type="hidden" name="id" value="@table.Id" />
+                                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title">Table Statistics</h6>
+                                <div class="row text-center">
+                                    <div class="col-md-3">
+                                        <div class="mb-2">
+                                            <span class="h4 text-warning">@Model.Count</span>
+                                        </div>
+                                        <small class="text-muted">Total Tables</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-2">
+                                            <span class="h4 text-primary">@Model.Sum(t => t.Capacity)</span>
+                                        </div>
+                                        <small class="text-muted">Total Seats</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-2">
+                                            <span class="h4 text-success">@(Model.Any() ? Model.Average(t => t.Capacity).ToString("F1") : "0")</span>
+                                        </div>
+                                        <small class="text-muted">Average Capacity</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-2">
+                                            <span class="h4 text-info">@(Model.Any() ? Model.Max(t => t.Capacity) : 0)</span>
+                                        </div>
+                                        <small class="text-muted">Largest Table</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-chair fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No tables found</h5>
+                    <p class="text-muted">There are currently no tables configured in the restaurant.</p>
+                    <a asp-controller="AdminPanel" asp-action="CreateTable" class="btn btn-warning">
+                        Add First Table
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+}

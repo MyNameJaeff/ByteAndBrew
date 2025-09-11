@@ -1,0 +1,402 @@
+﻿@using Microsoft.AspNetCore.Http
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-4xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p class="text-gray-600 mt-2">Restaurant Management System</p>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span class="text-gray-700 font-medium">Welcome, @Context.Session.GetString("AdminUsername")</span>
+            <form method="post" action="/AdminPanel/Logout">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="notification-container"></div>
+
+    <!-- Management Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        <!-- Bookings Card -->
+        <div class="relative bg-white rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-200">
+            <div class="p-8 text-center">
+                <div class="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-calendar-check text-3xl text-blue-600"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Manage Bookings</h3>
+                <p class="text-gray-600 mb-6 leading-relaxed">View, create, edit and delete customer bookings.</p>
+                <button onclick="loadPanel('Bookings')" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl font-medium shadow-lg">
+                    Manage Bookings
+                </button>
+            </div>
+        </div>
+
+        <!-- Menu Card -->
+        <div class="relative bg-white rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-200">
+            <div class="p-8 text-center">
+                <div class="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-utensils text-3xl text-green-600"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Manage Menu</h3>
+                <p class="text-gray-600 mb-6 leading-relaxed">Add, update and remove items from the restaurant menu.</p>
+                <button onclick="loadPanel('MenuItems')" class="bg-green-600 hover:bg-green-700 text-white px-6 py-4 rounded-xl font-medium shadow-lg">
+                    Manage Menu
+                </button>
+            </div>
+        </div>
+
+        <!-- Tables Card -->
+        <div class="relative bg-white rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-200">
+            <div class="p-8 text-center">
+                <div class="bg-yellow-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-chair text-3xl text-yellow-600"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Manage Tables</h3>
+                <p class="text-gray-600 mb-6 leading-relaxed">Configure restaurant tables and seating capacity.</p>
+                <button onclick="loadPanel('Tables')" class="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-4 rounded-xl font-medium shadow-lg">
+                    Manage Tables
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container under the management buttons -->
+    <div id="management-panel" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12"></div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-200">
+        <div class="bg-gradient-to-r from-gray-800 to-gray-900 text-white p-6 rounded-t-2xl">
+            <h2 class="text-2xl font-bold flex items-center">
+                <i class="fas fa-bolt mr-3"></i>Quick Actions
+            </h2>
+        </div>
+        <div class="p-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Booking Quick Action -->
+                <div class="relative">
+                    <button onclick="toggleQuickForm(this, 'CreateBooking')"
+                            class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-4 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg w-full">
+                        <i class="fas fa-plus mr-2"></i> Create New Booking
+                    </button>
+                    <div class="quick-form-container mt-2 hidden"></div>
+                </div>
+
+                <!-- Menu Item Quick Action -->
+                <div class="relative">
+                    <button onclick="toggleQuickForm(this, 'CreateMenuItem')"
+                            class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-4 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg w-full">
+                        <i class="fas fa-plus mr-2"></i> Add Menu Item
+                    </button>
+                    <div class="quick-form-container mt-2 hidden"></div>
+                </div>
+
+                <!-- Table Quick Action -->
+                <div class="relative">
+                    <button onclick="toggleQuickForm(this, 'CreateTable')"
+                            class="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white px-6 py-4 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg w-full">
+                        <i class="fas fa-plus mr-2"></i> Add Table
+                    </button>
+                    <div class="quick-form-container mt-2 hidden"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+}
+
+@section Scripts {
+    <script>
+                // ------------------------------
+        // Notification system
+        // ------------------------------
+        function showNotification(message, type = 'success') {
+            const container = document.getElementById('notification-container');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
+                <span>${message}</span>
+                <button class="ml-auto text-white hover:text-gray-200" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.appendChild(notification);
+            setTimeout(() => notification.remove(), 5000);
+        }
+
+        // ------------------------------
+        // Load management panels
+        // ------------------------------
+        async function loadPanel(type) {
+            const container = document.getElementById("management-panel");
+            container.innerHTML = '<div class="text-center p-8"><i class="fas fa-spinner fa-spin text-4xl text-gray-400"></i><p class="text-gray-500 mt-4">Loading...</p></div>';
+            try {
+                const response = await fetch(`/AdminPanel/Get${type}Panel`);
+                const html = await response.text();
+                container.innerHTML = html;
+                initializePanelForms(container);
+            } catch (err) {
+                container.innerHTML = '<p class="text-red-500 p-4">Failed to load panel</p>';
+                showNotification('Failed to load panel', 'error');
+            }
+        }
+
+        // ------------------------------
+        // Initialize forms in loaded panel
+        // ------------------------------
+        function initializePanelForms(container) {
+            const forms = container.querySelectorAll('form');
+            forms.forEach(form => {
+                if (form.dataset.initialized) return;
+                form.dataset.initialized = 'true';
+
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await handleFormSubmit(form);
+                });
+            });
+        }
+
+        // ------------------------------
+        // Toggle quick forms
+        // ------------------------------
+        async function toggleQuickForm(btn, type) {
+            const container = btn.nextElementSibling;
+            const isVisible = !container.classList.contains('hidden');
+
+            // Hide all other quick forms first
+            document.querySelectorAll('.quick-form-container').forEach(c => {
+                if (c !== container) {
+                    c.innerHTML = '';
+                    c.classList.add('hidden');
+                    c.previousElementSibling.disabled = false;
+                }
+            });
+
+            if (isVisible) {
+                container.innerHTML = '';
+                container.classList.add('hidden');
+                btn.disabled = false;
+                return;
+            }
+
+            container.innerHTML = '<p class="text-gray-500 p-4">Loading form...</p>';
+            container.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`/AdminPanel/Get${type}Panel`);
+                const html = await response.text();
+                container.innerHTML = html;
+
+                if (type === 'CreateBooking') {
+                    initializeBookingForm(container);
+                }
+
+                initializeQuickForm(container, type);
+                btn.disabled = true;
+            } catch (err) {
+                container.innerHTML = '<p class="text-red-500 p-4">Failed to load form</p>';
+                showNotification('Failed to load form', 'error');
+            }
+        }
+
+        function initializeQuickForm(container, type) {
+            const form = container.querySelector('form');
+            if (!form) return;
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                if (type === 'CreateBooking') {
+                    await handleBookingFormSubmit(form, () => {
+                        container.innerHTML = '';
+                        container.classList.add('hidden');
+                        container.previousElementSibling.disabled = false;
+                    });
+                } else {
+                    await handleRegularFormSubmit(form, () => {
+                        container.innerHTML = '';
+                        container.classList.add('hidden');
+                        container.previousElementSibling.disabled = false;
+                    });
+                }
+            });
+        }
+
+        // ------------------------------
+        // Form submission handlers
+        // ------------------------------
+        async function handleBookingFormSubmit(form, onSuccess) {
+            const formData = new FormData(form);
+            const actionUrl = form.getAttribute('action');
+
+            try {
+                const response = await fetch(actionUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    showNotification('Booking created successfully!', 'success');
+                    if (onSuccess) onSuccess();
+                } else {
+                    const errorText = await response.text();
+                    console.error('Booking creation failed:', errorText);
+                    showNotification('Failed to create booking', 'error');
+                }
+            } catch (err) {
+                console.error('Form submission error:', err);
+                showNotification('Failed to submit booking form', 'error');
+            }
+        }
+
+        async function handleRegularFormSubmit(form, onSuccess) {
+            const formData = new FormData(form);
+            const actionUrl = form.getAttribute('action');
+
+            try {
+                const response = await fetch(actionUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    showNotification('Operation completed successfully!', 'success');
+                    if (onSuccess) onSuccess();
+                } else {
+                    const errorText = await response.text();
+                    console.error('Form submission failed:', errorText);
+                    showNotification('Operation failed', 'error');
+                }
+            } catch (err) {
+                console.error('Form submission error:', err);
+                showNotification('Failed to submit form', 'error');
+            }
+        }
+
+        // Legacy handler for backward compatibility
+        async function handleFormSubmit(form, onSuccess) {
+            return await handleRegularFormSubmit(form, onSuccess);
+        }
+
+        // ------------------------------
+        // Booking form (table + date + slots)
+        // ------------------------------
+        function initializeBookingForm(container) {
+            const dateInput = container.querySelector('#bookingDate');
+            const tableSelect = container.querySelector('#tableSelect');
+            const slotContainer = container.querySelector('#timeSlotContainer');
+            const hiddenInput = container.querySelector('#hiddenBookingDateTime');
+
+            if (!dateInput || !tableSelect || !slotContainer || !hiddenInput) {
+                console.error('Booking form elements not found');
+                return;
+            }
+
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.min = today;
+            dateInput.value = today;
+
+            async function loadAvailableSlots() {
+                const tableId = tableSelect.value;
+                const date = dateInput.value;
+
+                if (!tableId || !date) {
+                    slotContainer.innerHTML = '<p class="text-gray-500">Please select a table and date first.</p>';
+                    hiddenInput.value = '';
+                    return;
+                }
+
+                slotContainer.innerHTML = '<p class="text-gray-500">Loading available slots...</p>';
+
+                try {
+                    const res = await fetch(`/AdminPanel/GetAvailableSlots?tableId=${tableId}&date=${date}`);
+                    if (!res.ok) {
+                        throw new Error(`HTTP ${res.status}`);
+                    }
+
+                    const slots = await res.json();
+
+                    if (!slots || !slots.length) {
+                        slotContainer.innerHTML = '<p class="text-gray-500">No available slots for selected date/table.</p>';
+                        hiddenInput.value = '';
+                        return;
+                    }
+
+                    slotContainer.innerHTML = `
+                        <label class="block text-gray-700 font-medium mb-2">Select Time Slot *</label>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                            ${slots.map(s => `
+                                <div class="time-slot px-3 py-2 rounded-lg text-center cursor-pointer border transition-all duration-200
+                                    ${s.Available ? 'bg-green-100 hover:bg-green-200 border-green-300' : 'bg-gray-200 border-gray-300 line-through cursor-not-allowed'}"
+                                    data-time="${s.Time}" ${s.Available ? '' : 'data-disabled="true"'}>
+                                    ${s.Display}
+                                </div>`).join('')}
+                        </div>
+                    `;
+
+                    // Add click listeners for available slots
+                    slotContainer.querySelectorAll('.time-slot:not([data-disabled])').forEach(slot => {
+                        slot.addEventListener('click', () => {
+                            // Remove selection from all slots
+                            slotContainer.querySelectorAll('.time-slot').forEach(s => {
+                                s.classList.remove('bg-blue-500', 'text-white', 'border-blue-500');
+                                s.classList.add('bg-green-100', 'border-green-300');
+                            });
+
+                            // Select clicked slot
+                            slot.classList.remove('bg-green-100', 'border-green-300');
+                            slot.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
+
+                            // Update hidden input
+                            hiddenInput.value = `${date}T${slot.dataset.time}:00`;
+                            console.log('Selected datetime:', hiddenInput.value);
+                        });
+                    });
+
+                    // Auto-select first available slot
+                    const firstAvailable = slotContainer.querySelector('.time-slot:not([data-disabled])');
+                    if (firstAvailable) {
+                        firstAvailable.click();
+                    }
+
+                } catch (err) {
+                    console.error('Failed to load slots:', err);
+                    slotContainer.innerHTML = '<p class="text-red-500">Failed to load available slots.</p>';
+                    hiddenInput.value = '';
+                }
+            }
+
+            // Event listeners
+            dateInput.addEventListener('change', loadAvailableSlots);
+            tableSelect.addEventListener('change', loadAvailableSlots);
+
+            // Initial load if table is already selected
+            if (tableSelect.value) {
+                loadAvailableSlots();
+            }
+        }
+
+        // ------------------------------
+        // Initialize notifications from TempData
+        // ------------------------------
+        document.addEventListener('DOMContentLoaded', () => {
+            const tempSuccess = '@TempData["Success"]';
+            const tempError = '@TempData["Error"]';
+            if (tempSuccess && tempSuccess !== '') showNotification(tempSuccess, 'success');
+            if (tempError && tempError !== '') showNotification(tempError, 'error');
+        });
+    </script>
+}

@@ -6,6 +6,7 @@
     <title>@ViewData["Title"] - Byte & Brew</title>
     <link rel="stylesheet" href="~/css/site.css" />
 
+    @RenderSection("Styles", required: false)
     @* Tailwind CSS (only way i got it to work atm) *@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -40,5 +41,6 @@
         </div>
     </footer>
 
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

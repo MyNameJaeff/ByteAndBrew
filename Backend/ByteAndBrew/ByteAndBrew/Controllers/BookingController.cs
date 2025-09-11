@@ -184,5 +184,18 @@ namespace ByteAndBrew.Controllers
 
             return conflictingBooking != null;
         }
+
+        [HttpGet("available-times")]
+        public async Task<IActionResult> GetAvailableTimes(int tableId, DateTime date)
+        {
+            // Get all bookings for this table on the given day
+            var bookings = await _db.Bookings
+                .Where(b => b.TableId == tableId && b.StartTime.Date == date.Date)
+                .Select(b => b.StartTime)
+                .ToListAsync();
+
+            return Ok(bookings); // return booked start times
+        }
+
     }
 }

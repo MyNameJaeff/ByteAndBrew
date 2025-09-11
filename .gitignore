@@ -16,3 +16,4 @@ obj/
 # Ignore node_modules if you have any frontend code
 node_modules/
 Backend/Byte & Brew/Byte & Brew/appsettings.json
+Backend/Byte & Brew/Byte & Brew/appsettings.json

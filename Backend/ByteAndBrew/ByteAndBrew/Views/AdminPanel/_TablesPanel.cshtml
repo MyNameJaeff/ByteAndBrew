@@ -1,0 +1,24 @@
+﻿@model List<ByteAndBrew.Models.Table>
+
+<div class="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 mt-6">
+    <h3 class="text-xl font-bold text-gray-900 mb-4">Tables</h3>
+    @if (!Model.Any())
+    {
+        <p class="text-gray-500">No tables found.</p>
+    }
+    else
+    {
+        <ul class="space-y-2">
+            @foreach (var table in Model)
+            {
+                <li class="flex justify-between items-center p-3 border border-gray-100 rounded-lg">
+                    <span>Table @table.Id (Seats: @table.Capacity)</span>
+                    <div class="space-x-2">
+                        <a href="@Url.Action("EditTable", "AdminPanel", new { id = table.Id })" class="text-blue-600 hover:underline">Edit</a>
+                        <button onclick="deleteItem('Table', @table.Id, this)" class="text-red-600 hover:underline">Delete</button>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</div>

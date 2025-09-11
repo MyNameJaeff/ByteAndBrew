@@ -1,0 +1,43 @@
+﻿@model ByteAndBrew.Dtos.Admin.AdminLoginDto
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Admin Login";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">Admin Login (Debug)</h3>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @ViewBag.Error
+                        </div>
+                    }
+
+                    <form method="post" action="/AdminPanel/Login">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label for="Username" class="form-label">Username</label>
+                            <input name="Username" id="Username" type="text" class="form-control" value="@Model?.Username" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Password" class="form-label">Password</label>
+                            <input name="Password" id="Password" type="password" class="form-control" required />
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary" onclick="console.log('Submit clicked');">Login</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

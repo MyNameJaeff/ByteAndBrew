@@ -1,0 +1,27 @@
+﻿@{
+    /* _BookingsPanel.cshtml */
+}
+@model List<ByteAndBrew.Models.Booking>
+
+<div class="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 mt-6">
+    <h3 class="text-xl font-bold text-gray-900 mb-4">Bookings</h3>
+    @if (!Model.Any())
+    {
+        <p class="text-gray-500">No bookings found.</p>
+    }
+    else
+    {
+        <ul class="space-y-2">
+            @foreach (var booking in Model)
+            {
+                <li class="flex justify-between items-center p-3 border border-gray-100 rounded-lg">
+                    <span>@booking.Customer.Name (@booking.StartTime.ToShortDateString())</span>
+                    <div class="space-x-2">
+                        <a href="@Url.Action("EditBooking", "AdminPanel", new { id = booking.Id })" class="text-blue-600 hover:underline">Edit</a>
+                        <button onclick="deleteItem('Booking', @booking.Id, this)" class="text-red-600 hover:underline">Delete</button>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</div>

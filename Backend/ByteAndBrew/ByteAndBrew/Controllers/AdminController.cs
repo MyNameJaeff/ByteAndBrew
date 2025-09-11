@@ -157,6 +157,7 @@ namespace ByteAndBrew.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Login(AdminLoginDto dto)
         {
+            System.Diagnostics.Debug.WriteLine($"Received DTO: Username='{dto.Username}', Password='{dto.Password}'");
             if (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrWhiteSpace(dto.Password))
                 return BadRequest("Username and password are required.");
 

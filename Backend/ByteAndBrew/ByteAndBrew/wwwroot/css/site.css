@@ -1,1 +1,65 @@
-﻿
+﻿.time-slot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.time-slot {
+    padding: 8px 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+}
+
+    .time-slot:hover:not(.unavailable) {
+        border-color: #3b82f6;
+        background: #eff6ff;
+    }
+
+    .time-slot.selected {
+        background: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+    }
+
+    .time-slot.unavailable {
+        background: #f3f4f6;
+        color: #9ca3af;
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+
+.notification {
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    animation: slideIn 0.3s ease-out;
+}
+
+    .notification.success {
+        background: #10b981;
+        color: white;
+    }
+
+    .notification.error {
+        background: #ef4444;
+        color: white;
+    }
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}

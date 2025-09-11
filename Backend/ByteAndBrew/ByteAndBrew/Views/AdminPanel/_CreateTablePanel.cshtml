@@ -1,0 +1,12 @@
+﻿@{
+    /* _CreateTablePanel.cshtml */
+}
+@model ByteAndBrew.Models.Table
+<div class="bg-white shadow-md rounded-2xl p-6">
+    <h3 class="text-xl font-bold mb-4">Add New Table</h3>
+    <form asp-action="CreateTable" method="post">
+        @Html.AntiForgeryToken()
+        <!-- Add your table form fields here -->
+        <button type="submit" class="bg-yellow-600 text-white px-4 py-2 rounded-lg mt-4">Add Table</button>
+    </form>
+</div>
