@@ -157,7 +157,6 @@ namespace ByteAndBrew.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Login(AdminLoginDto dto)
         {
-            System.Diagnostics.Debug.WriteLine($"Received DTO: Username='{dto.Username}', Password='{dto.Password}'");
             if (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrWhiteSpace(dto.Password))
                 return BadRequest("Username and password are required.");
 
@@ -170,14 +169,26 @@ namespace ByteAndBrew.Controllers
             // Generate JWT
             var jwt = GenerateJwtToken(admin);
 
+            // Set JWT as secure, HTTP-only cookie
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddHours(2)
+            };
+            Response.Cookies.Append("jwtToken", jwt, cookieOptions);
+
+            // Return admin info (minimal)
             return Ok(new
             {
-                token = jwt,
+                token = jwt,  // <-- add this
                 adminId = admin.Id,
                 username = admin.Username,
                 expiresAt = DateTime.UtcNow.AddHours(2)
             });
         }
+
 
         private string GenerateJwtToken(Admin admin)
         {

@@ -69,6 +69,39 @@ namespace ByteAndBrew.Controllers
             return Ok(dto);
         }
 
+        [Authorize] // Only admins should get the customers info to stop others from accesing them
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchCustomer([FromQuery] string phoneNumber)
+        {
+            if (string.IsNullOrWhiteSpace(phoneNumber))
+                return BadRequest("Phone number is required");
+
+            var customer = await _db.Customers
+                .Include(c => c.Bookings)
+                .FirstOrDefaultAsync(c => c.PhoneNumber == phoneNumber.Trim());
+
+            if (customer == null)
+                return Ok(null); // return null if not found
+
+            var dto = new CustomerReadDto
+            {
+                Id = customer.Id,
+                Name = customer.Name,
+                PhoneNumber = customer.PhoneNumber,
+                Bookings = customer.Bookings.Select(b => new BookingReadDto
+                {
+                    Id = b.Id,
+                    StartTime = b.StartTime,
+                    NumberOfGuests = b.NumberOfGuests,
+                    TableId = b.TableId,
+                    CustomerId = b.CustomerId
+                }).ToList()
+            };
+
+            return Ok(dto);
+        }
+
+
         [AllowAnonymous] // Thinking if the users are allowed to create a customer (might change depending on)
         [HttpPost]
         public async Task<IActionResult> Create(CustomerCreateDto dto)

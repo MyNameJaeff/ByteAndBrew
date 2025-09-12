@@ -33,6 +33,30 @@ namespace ByteAndBrew.Controllers
             return Ok(dtoList);
         }
 
+        [Authorize]
+        [HttpGet("detailed")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAllDetailed()
+        {
+            var bookings = await _db.Bookings
+                .Include(b => b.Customer)
+                .Include(b => b.Table)
+                .ToListAsync();
+            var dtoList = bookings.Select(b => new BookingReadDetailedDto
+            {
+                Id = b.Id,
+                StartTime = b.StartTime,
+                NumberOfGuests = b.NumberOfGuests,
+                TableId = b.TableId,
+                TableNumber = b.Table.TableNumber,
+                TableCapacity = b.Table.Capacity,
+                CustomerId = b.CustomerId,
+                CustomerName = b.Customer.Name,
+                CustomerPhoneNumber = b.Customer.PhoneNumber
+            }).ToList();
+            return Ok(dtoList);
+        }
+
         [AllowAnonymous]
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -109,27 +133,32 @@ namespace ByteAndBrew.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Update(int id, BookingCreateDto dto)
         {
+            // Find the booking
             var booking = await _db.Bookings.FindAsync(id);
-            if (booking == null) return NotFound($"There's no booking with id {id}");
+            if (booking == null)
+                return NotFound($"There's no booking with id {id}");
 
             // Validate customer exists
             var customer = await _db.Customers.FindAsync(dto.CustomerId);
-            if (customer == null) return BadRequest("Customer not found.");
+            if (customer == null)
+                return BadRequest("Customer not found.");
 
-            // Validate table exists and capacity
+            // Validate table exists
             var table = await _db.Tables.FindAsync(dto.TableId);
-            if (table == null) return BadRequest("Table not found.");
-            if (dto.NumberOfGuests > table.Capacity)
-                return BadRequest("Too many guests for this table.");
+            if (table == null)
+                return BadRequest("Table not found.");
+
+            // Validate number of guests
             if (dto.NumberOfGuests <= 0)
                 return BadRequest("Number of guests must be greater than 0.");
+            if (dto.NumberOfGuests > table.Capacity)
+                return BadRequest($"Too many guests for this table (max {table.Capacity}).");
 
-            // Check for conflicts, excluding the current booking
+            // Check for booking conflicts, excluding current booking
             if (await HasBookingConflict(dto.TableId, dto.StartTime, id))
-            {
-                return BadRequest("Table is not available at the requested time. Remember that each booking reserves the table for 2 hours.");
-            }
+                return BadRequest("Table is not available at the requested time. Each booking reserves the table for 2 hours.");
 
+            // Update booking
             booking.TableId = dto.TableId;
             booking.CustomerId = dto.CustomerId;
             booking.StartTime = dto.StartTime;
@@ -137,6 +166,7 @@ namespace ByteAndBrew.Controllers
 
             await _db.SaveChangesAsync();
 
+            // Return updated booking
             var readDto = new BookingReadDto
             {
                 Id = booking.Id,

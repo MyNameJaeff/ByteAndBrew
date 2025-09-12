@@ -1,13 +1,14 @@
 ﻿using ByteAndBrew.Dtos.Admin;
 using ByteAndBrew.Dtos.Booking;
 using ByteAndBrew.Dtos.Customer;
+using ByteAndBrew.Dtos.MenuItem;
 using ByteAndBrew.Dtos.Table;
 using ByteAndBrew.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Diagnostics;
 using System.Net.Http.Headers;
-using System.Text.Json;
 
 namespace ByteAndBrew.Controllers
 {
@@ -25,7 +26,7 @@ namespace ByteAndBrew.Controllers
         private HttpClient CreateAuthenticatedClient()
         {
             var client = _httpClientFactory.CreateClient("ByteAndBrewAPI");
-            var token = HttpContext.Session.GetString("JWToken");
+            var token = Request.Cookies["jwtToken"];
             if (!string.IsNullOrEmpty(token))
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -35,7 +36,7 @@ namespace ByteAndBrew.Controllers
 
         private bool IsAuthenticated()
         {
-            return !string.IsNullOrEmpty(HttpContext.Session.GetString("JWToken"));
+            return Request.Cookies.ContainsKey("jwtToken");
         }
 
         public IActionResult Index()
@@ -69,23 +70,26 @@ namespace ByteAndBrew.Controllers
             try
             {
                 using var client = _httpClientFactory.CreateClient("ByteAndBrewAPI");
-                var json = JsonSerializer.Serialize(model);
-                Debug.WriteLine("Sending JSON: " + json);
-
                 var response = await client.PostAsJsonAsync("Admins/login", model);
-                Debug.WriteLine(response);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var result = await response.Content.ReadFromJsonAsync<AdminResponses>();
+
                     if (result != null && !string.IsNullOrEmpty(result.Token))
                     {
-                        HttpContext.Session.SetString("JWToken", result.Token);
-                        HttpContext.Session.SetString("AdminUsername", result.Username);
-                        HttpContext.Session.SetInt32("AdminId", result.AdminId);
+                        Response.Cookies.Append("jwtToken", result.Token, new CookieOptions
+                        {
+                            HttpOnly = true,
+                            Secure = true,
+                            SameSite = SameSiteMode.Lax,
+                            Expires = DateTime.UtcNow.AddHours(2)
+                        });
 
+                        TempData["Success"] = $"Welcome {result.Username}";
                         return RedirectToAction("Dashboard");
                     }
+
                     else
                     {
                         ViewBag.Error = "Login response was invalid.";
@@ -101,12 +105,12 @@ namespace ByteAndBrew.Controllers
 
                 return View(model);
             }
-            catch (HttpRequestException ex)
+            catch (HttpRequestException)
             {
                 ViewBag.Error = "Unable to connect to the server. Please try again later.";
                 return View(model);
             }
-            catch (Exception ex)
+            catch
             {
                 ViewBag.Error = "An unexpected error occurred. Please try again.";
                 return View(model);
@@ -116,7 +120,8 @@ namespace ByteAndBrew.Controllers
         [HttpPost]
         public IActionResult Logout()
         {
-            HttpContext.Session.Clear();
+            // Remove the cookie
+            Response.Cookies.Delete("jwtToken");
             TempData["Success"] = "You have been successfully logged out.";
             return RedirectToAction("Login");
         }
@@ -147,7 +152,6 @@ namespace ByteAndBrew.Controllers
             Debug.WriteLine($"NumberOfGuests: {model.NumberOfGuests}");
             Debug.WriteLine($"TableId: {model.TableId}");
 
-            // Check authentication
             if (!IsAuthenticated())
             {
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -155,46 +159,37 @@ namespace ByteAndBrew.Controllers
                 return RedirectToAction("Login");
             }
 
-            // Validate the model
             if (!ModelState.IsValid)
             {
-                // For AJAX requests, return validation errors
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" ||
                     Request.ContentType?.Contains("application/json") == true)
                 {
-                    var errors = ModelState
-                        .Where(x => x.Value.Errors.Count > 0)
-                        .SelectMany(x => x.Value.Errors)
-                        .Select(x => x.ErrorMessage)
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
                         .ToList();
-
-                    return BadRequest(new { errors = errors });
+                    return BadRequest(new { errors });
                 }
-
-                // For regular form submissions, return partial view with tables loaded
                 await LoadTablesForBookingForm();
                 return PartialView("_CreateBookingPanel", model);
             }
 
-            // Additional validation
             if (model.StartTime <= DateTime.Now)
             {
-                ModelState.AddModelError("StartTime", "Booking time must be in the future.");
+                var errorMsg = "Booking time must be in the future.";
+                ModelState.AddModelError("StartTime", errorMsg);
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                {
-                    return BadRequest(new { errors = new[] { "Booking time must be in the future." } });
-                }
+                    return BadRequest(new { errors = new[] { errorMsg } });
                 await LoadTablesForBookingForm();
                 return PartialView("_CreateBookingPanel", model);
             }
 
             if (model.NumberOfGuests <= 0)
             {
-                ModelState.AddModelError("NumberOfGuests", "Number of guests must be greater than 0.");
+                var errorMsg = "Number of guests must be greater than 0.";
+                ModelState.AddModelError("NumberOfGuests", errorMsg);
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                {
-                    return BadRequest(new { errors = new[] { "Number of guests must be greater than 0." } });
-                }
+                    return BadRequest(new { errors = new[] { errorMsg } });
                 await LoadTablesForBookingForm();
                 return PartialView("_CreateBookingPanel", model);
             }
@@ -203,15 +198,13 @@ namespace ByteAndBrew.Controllers
             {
                 using var httpClient = CreateAuthenticatedClient();
 
-                // Step 1: Check if table exists and get its capacity
+                // Step 1: Validate table
                 var tableResponse = await httpClient.GetAsync($"Tables/{model.TableId}");
                 if (!tableResponse.IsSuccessStatusCode)
                 {
                     var error = "Selected table does not exist.";
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                    {
                         return BadRequest(new { errors = new[] { error } });
-                    }
                     TempData["Error"] = error;
                     await LoadTablesForBookingForm();
                     return PartialView("_CreateBookingPanel", model);
@@ -222,71 +215,70 @@ namespace ByteAndBrew.Controllers
                 {
                     var error = $"Number of guests ({model.NumberOfGuests}) exceeds table capacity ({table.Capacity}).";
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                    {
                         return BadRequest(new { errors = new[] { error } });
-                    }
                     ModelState.AddModelError("NumberOfGuests", error);
                     await LoadTablesForBookingForm();
                     return PartialView("_CreateBookingPanel", model);
                 }
 
-                // Step 2: Check if the time slot is still available
+                // Step 2: Check time slot availability
                 var existingBookingsResponse = await httpClient.GetAsync("Bookings");
                 if (existingBookingsResponse.IsSuccessStatusCode)
                 {
                     var existingBookings = await existingBookingsResponse.Content.ReadFromJsonAsync<List<Booking>>();
-                    var conflictingBooking = existingBookings?.FirstOrDefault(b =>
+                    var conflict = existingBookings?.FirstOrDefault(b =>
                         b.TableId == model.TableId &&
                         b.StartTime.Date == model.StartTime.Date &&
                         b.StartTime.Hour == model.StartTime.Hour);
-
-                    if (conflictingBooking != null)
+                    if (conflict != null)
                     {
                         var error = "Selected time slot is no longer available. Please choose another time.";
                         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                        {
                             return BadRequest(new { errors = new[] { error } });
-                        }
                         ModelState.AddModelError("StartTime", error);
                         await LoadTablesForBookingForm();
                         return PartialView("_CreateBookingPanel", model);
                     }
                 }
 
-                // Step 3: Create customer
+                // Step 3: Find or create customer
                 var customerDto = new CustomerCreateDto
                 {
                     Name = model.Name?.Trim(),
                     PhoneNumber = model.PhoneNumber?.Trim()
                 };
 
-                var customerResponse = await httpClient.PostAsJsonAsync("Customers", customerDto);
-                if (!customerResponse.IsSuccessStatusCode)
-                {
-                    var errorContent = await customerResponse.Content.ReadAsStringAsync();
-                    Debug.WriteLine($"Customer creation failed: {errorContent}");
+                CustomerReadDto customer = null;
 
-                    var error = "Failed to create customer. Please try again.";
-                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                    {
-                        return BadRequest(new { errors = new[] { error } });
-                    }
-                    TempData["Error"] = error;
-                    await LoadTablesForBookingForm();
-                    return PartialView("_CreateBookingPanel", model);
+                var existingCustomerResponse = await httpClient.GetAsync($"Customers/search?phoneNumber={customerDto.PhoneNumber}");
+                if (existingCustomerResponse.IsSuccessStatusCode && existingCustomerResponse.StatusCode != System.Net.HttpStatusCode.NoContent)
+                {
+                    customer = await existingCustomerResponse.Content.ReadFromJsonAsync<CustomerReadDto>();
                 }
 
-                var customer = await customerResponse.Content.ReadFromJsonAsync<CustomerReadDto>();
                 if (customer == null)
                 {
-                    var error = "Customer creation failed (invalid response).";
-                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    var customerResponse = await httpClient.PostAsJsonAsync("Customers", customerDto);
+                    if (!customerResponse.IsSuccessStatusCode)
                     {
-                        return BadRequest(new { errors = new[] { error } });
+                        var error = "Failed to create customer. Please try again.";
+                        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                            return BadRequest(new { errors = new[] { error } });
+                        TempData["Error"] = error;
+                        await LoadTablesForBookingForm();
+                        return PartialView("_CreateBookingPanel", model);
                     }
-                    TempData["Error"] = error;
-                    await LoadTablesForBookingForm();
-                    return PartialView("_CreateBookingPanel", model);
+
+                    customer = await customerResponse.Content.ReadFromJsonAsync<CustomerReadDto>();
+                    if (customer == null)
+                    {
+                        var error = "Customer creation failed (invalid response).";
+                        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                            return BadRequest(new { errors = new[] { error } });
+                        TempData["Error"] = error;
+                        await LoadTablesForBookingForm();
+                        return PartialView("_CreateBookingPanel", model);
+                    }
                 }
 
                 // Step 4: Create booking
@@ -301,26 +293,17 @@ namespace ByteAndBrew.Controllers
                 var bookingResponse = await httpClient.PostAsJsonAsync("Bookings", bookingDto);
                 if (bookingResponse.IsSuccessStatusCode)
                 {
-                    Debug.WriteLine("Booking created successfully");
-
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                    {
                         return Ok(new { success = true, message = "Booking created successfully!" });
-                    }
 
                     TempData["Success"] = "Booking created successfully!";
                     return RedirectToAction("Dashboard");
                 }
                 else
                 {
-                    var errorContent = await bookingResponse.Content.ReadAsStringAsync();
-                    Debug.WriteLine($"Booking creation failed: {errorContent}");
-
                     var error = "Failed to create booking. Please try again.";
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                    {
                         return BadRequest(new { errors = new[] { error } });
-                    }
                     TempData["Error"] = error;
                     await LoadTablesForBookingForm();
                     return PartialView("_CreateBookingPanel", model);
@@ -330,11 +313,8 @@ namespace ByteAndBrew.Controllers
             {
                 Debug.WriteLine($"HTTP Exception: {ex.Message}");
                 var error = "Unable to connect to the server. Please try again later.";
-
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                {
                     return BadRequest(new { errors = new[] { error } });
-                }
                 TempData["Error"] = error;
                 await LoadTablesForBookingForm();
                 return PartialView("_CreateBookingPanel", model);
@@ -343,11 +323,8 @@ namespace ByteAndBrew.Controllers
             {
                 Debug.WriteLine($"Exception: {ex.Message}");
                 var error = "An unexpected error occurred. Please try again.";
-
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                {
                     return BadRequest(new { errors = new[] { error } });
-                }
                 TempData["Error"] = error;
                 await LoadTablesForBookingForm();
                 return PartialView("_CreateBookingPanel", model);
@@ -382,11 +359,11 @@ namespace ByteAndBrew.Controllers
         public IActionResult CreateMenuItem()
         {
             if (!IsAuthenticated()) return RedirectToAction("Login");
-            return View(new MenuItem());
+            return View(new MenuItemCreateDto());
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateMenuItem(MenuItem model)
+        public async Task<IActionResult> CreateMenuItem(MenuItemCreateDto model)
         {
             if (!ModelState.IsValid) return View(model);
 
@@ -406,11 +383,11 @@ namespace ByteAndBrew.Controllers
         public IActionResult CreateTable()
         {
             if (!IsAuthenticated()) return RedirectToAction("Login");
-            return View(new Table());
+            return View(new TableCreateDto());
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateTable(Table model)
+        public async Task<IActionResult> CreateTable(TableCreateDto model)
         {
             if (!ModelState.IsValid) return View(model);
 
@@ -455,24 +432,39 @@ namespace ByteAndBrew.Controllers
 
         public IActionResult GetCreateMenuItemPanel()
         {
-            return PartialView("_CreateMenuItemPanel", new MenuItem());
+            return PartialView("_CreateMenuItemPanel", new MenuItemCreateDto());
         }
 
         public IActionResult GetCreateTablePanel()
         {
-            return PartialView("_CreateTablePanel", new Table());
+            return PartialView("_CreateTablePanel", new TableCreateDto());
         }
 
         public async Task<IActionResult> GetBookingsPanel()
         {
             Debug.WriteLine("GetBookingsPanel");
+
             using var client = CreateAuthenticatedClient();
-            var response = await client.GetAsync("Bookings");
-            var bookings = response.IsSuccessStatusCode
-                ? await response.Content.ReadFromJsonAsync<List<Booking>>()
-                : new List<Booking>();
+
+            // Call the detailed bookings endpoint (requires authorization)
+            var response = await client.GetAsync("Bookings/detailed");
+
+            List<BookingReadDetailedDto> bookings;
+
+            if (response.IsSuccessStatusCode)
+            {
+                bookings = await response.Content
+                    .ReadFromJsonAsync<List<BookingReadDetailedDto>>() ?? new List<BookingReadDetailedDto>();
+            }
+            else
+            {
+                bookings = new List<BookingReadDetailedDto>();
+                Debug.WriteLine($"Failed to fetch bookings: {response.StatusCode}");
+            }
+
             return PartialView("_BookingsPanel", bookings);
         }
+
 
         public async Task<IActionResult> GetMenuItemsPanel()
         {
@@ -497,27 +489,79 @@ namespace ByteAndBrew.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAvailableSlots(int tableId, DateTime date)
         {
-            using var client = CreateAuthenticatedClient();
-            var response = await client.GetAsync("Bookings");
-            var bookings = response.IsSuccessStatusCode
-                ? await response.Content.ReadFromJsonAsync<List<Booking>>()
-                : new List<Booking>();
+            try
+            {
+                using var client = CreateAuthenticatedClient();
+                var response = await client.GetAsync("Bookings");
+                var bookings = response.IsSuccessStatusCode
+                    ? await response.Content.ReadFromJsonAsync<List<Booking>>()
+                    : new List<Booking>();
 
-            bookings ??= new List<Booking>(); // säkerställ att listan inte är null
+                bookings ??= new List<Booking>();
 
-            var slots = Enumerable.Range(10, 7)
-                .Select(i => i * 2)
-                .Select(hour => new
+                // Define restaurant operating hours (10:00 to 20:00, 2-hour intervals)
+                var timeSlots = new List<object>();
+
+                for (int hour = 10; hour <= 20; hour += 2) // 10:00 to 20:00 (last booking)
                 {
-                    Time = $"{hour:00}:00",
-                    Display = $"{(hour % 12 == 0 ? 12 : hour % 12)}:00 {(hour >= 12 ? "PM" : "AM")}",
-                    Available = !bookings.Any(b =>
+                    var timeString = $"{hour:00}:00";
+
+                    var isAvailable = !bookings.Any(b =>
                         b.TableId == tableId &&
                         b.StartTime.Date == date.Date &&
-                        b.StartTime.Hour == hour)
-                }).ToList();
+                        b.StartTime.Hour == hour);
 
-            return Json(slots);
+                    timeSlots.Add(new
+                    {
+                        Time = timeString,
+                        Available = isAvailable
+                    });
+                }
+
+                return Json(timeSlots);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error in GetAvailableSlots: {ex.Message}");
+                return StatusCode(500, new { error = "Failed to load available time slots" });
+            }
+        }
+
+        [Authorize]
+        [HttpDelete("Bookings/{id}")]
+        public async Task<IActionResult> DeleteBooking(int id)
+        {
+            using var client = CreateAuthenticatedClient();
+            var response = await client.DeleteAsync($"Bookings/{id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                return Ok(new { success = true, message = "Booking deleted successfully" });
+            }
+            return BadRequest(new { success = false, message = "Failed to delete booking" });
+        }
+
+        [Authorize]
+        [HttpPut("Bookings/{id}")]
+        public async Task<IActionResult> UpdateBooking(int id, [FromBody] BookingUpdateDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new
+                {
+                    success = false,
+                    errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
+                });
+
+            using var client = CreateAuthenticatedClient();
+            var response = await client.PutAsJsonAsync($"Bookings/{id}", dto);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return Ok(new { success = true, message = "Booking updated successfully" });
+            }
+
+            var errorContent = await response.Content.ReadAsStringAsync();
+            return BadRequest(new { success = false, message = $"Failed to update booking: {errorContent}" });
         }
     }
 }

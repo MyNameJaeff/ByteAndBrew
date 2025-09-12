@@ -1,4 +1,4 @@
-﻿@model List<ByteAndBrew.Models.Booking>
+﻿@model List<ByteAndBrew.Dtos.Booking.BookingReadDetailedDto>
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Manage Bookings";
@@ -67,12 +67,12 @@
                             {
                                 <tr>
                                     <td>@booking.Id</td>
-                                    <td>@booking.Customer.Name</td>
-                                    <td>@booking.Customer.PhoneNumber</td>
+                                    <td>@booking.CustomerName</td>
+                                    <td>@booking.CustomerPhoneNumber</td>
                                     <td>
-                                        @if (booking.Table != null)
+                                        @if (booking.TableNumber != null)
                                         {
-                                            <span class="badge bg-info">Table @booking.Table.TableNumber</span>
+                                            <span class="badge bg-info">Table @booking.TableNumber</span>
                                         }
                                         else
                                         {
@@ -114,7 +114,7 @@
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                     </div>
                                                     <div class="modal-body">
-                                                        Are you sure you want to delete the booking for <strong>@booking.Customer.Name</strong> on @booking.StartTime.ToString("dd/MM/yyyy HH:mm")?
+                                                        Are you sure you want to delete the booking for <strong>@booking.CustomerName</strong> on @booking.StartTime.ToString("dd/MM/yyyy HH:mm")?
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

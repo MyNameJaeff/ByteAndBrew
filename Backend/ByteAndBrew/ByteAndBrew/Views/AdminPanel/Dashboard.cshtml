@@ -21,7 +21,7 @@
         </div>
     </div>
 
-    <div id="notification-container"></div>
+    <div id="notification-container" class="fixed top-4 right-4 flex flex-col gap-2 z-[9999]"></div>
 
     <!-- Management Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
@@ -117,30 +117,72 @@
 
 @section Scripts {
     <script>
-                // ------------------------------
+        // ------------------------------
         // Notification system
         // ------------------------------
         function showNotification(message, type = 'success') {
             const container = document.getElementById('notification-container');
+
             const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
+            notification.className = `
+                flex items-center p-4 rounded-md shadow-md min-w-[250px]
+                text-white ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}
+                animate-slide-in
+            `;
+
             notification.innerHTML = `
                 <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
                 <span>${message}</span>
-                <button class="ml-auto text-white hover:text-gray-200" onclick="this.parentElement.remove()">
+                <button class="ml-auto hover:text-gray-200" onclick="this.parentElement.remove()">
                     <i class="fas fa-times"></i>
                 </button>
             `;
+
             container.appendChild(notification);
-            setTimeout(() => notification.remove(), 5000);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => notification.remove(), 15000);
         }
+
 
         // ------------------------------
         // Load management panels
         // ------------------------------
         async function loadPanel(type) {
             const container = document.getElementById("management-panel");
-            container.innerHTML = '<div class="text-center p-8"><i class="fas fa-spinner fa-spin text-4xl text-gray-400"></i><p class="text-gray-500 mt-4">Loading...</p></div>';
+
+            // Find the button that was clicked
+            const btn = document.querySelector(`button[onclick="loadPanel('${type}')"]`);
+
+            // Toggle: if already loaded and visible, hide it
+            const currentType = container.dataset.panelType;
+            if (currentType === type && container.innerHTML.trim() !== '') {
+                container.innerHTML = '';
+                container.removeAttribute('data-panel-type');
+                btn.textContent = `Manage ${type}`; // restore original text
+                return;
+            }
+
+            // Close any other open panel first
+            const otherPanel = document.getElementById("management-panel");
+            if (otherPanel.dataset.panelType && otherPanel.dataset.panelType !== type) {
+                const otherType = otherPanel.dataset.panelType;
+                const otherBtn = document.querySelector(`button[onclick="loadPanel('${otherType}')"]`);
+                otherPanel.innerHTML = '';
+                otherPanel.removeAttribute('data-panel-type');
+                if (otherBtn) otherBtn.textContent = `Manage ${otherType}`;
+            }
+
+            // Set the current panel type
+            container.dataset.panelType = type;
+            container.innerHTML = `
+                <div class="text-center p-8">
+                    <i class="fas fa-spinner fa-spin text-4xl text-gray-400"></i>
+                    <p class="text-gray-500 mt-4">Loading...</p>
+                </div>
+            `;
+            btn.textContent = `Close ${type}`; // change text
+
             try {
                 const response = await fetch(`/AdminPanel/Get${type}Panel`);
                 const html = await response.text();
@@ -149,6 +191,7 @@
             } catch (err) {
                 container.innerHTML = '<p class="text-red-500 p-4">Failed to load panel</p>';
                 showNotification('Failed to load panel', 'error');
+                btn.textContent = `Manage ${type}`; // restore text on error
             }
         }
 
@@ -180,16 +223,25 @@
                 if (c !== container) {
                     c.innerHTML = '';
                     c.classList.add('hidden');
-                    c.previousElementSibling.disabled = false;
+                    const otherBtn = c.previousElementSibling;
+                    if (otherBtn) {
+                        // Restore button text (remove "Close")
+                        otherBtn.textContent = otherBtn.dataset.originalText || otherBtn.textContent;
+                        otherBtn.disabled = false;
+                    }
                 }
             });
 
             if (isVisible) {
                 container.innerHTML = '';
                 container.classList.add('hidden');
+                btn.textContent = btn.dataset.originalText || btn.textContent; // restore original text
                 btn.disabled = false;
                 return;
             }
+
+            // Save original text on first open
+            if (!btn.dataset.originalText) btn.dataset.originalText = btn.textContent;
 
             container.innerHTML = '<p class="text-gray-500 p-4">Loading form...</p>';
             container.classList.remove('hidden');
@@ -204,10 +256,15 @@
                 }
 
                 initializeQuickForm(container, type);
-                btn.disabled = true;
+
+                // Change button text to "Close …"
+                btn.textContent = `Close ${btn.dataset.originalText.replace(/^Add\s*/, '')}`;
+                btn.disabled = false;
             } catch (err) {
                 container.innerHTML = '<p class="text-red-500 p-4">Failed to load form</p>';
                 showNotification('Failed to load form', 'error');
+                btn.textContent = btn.dataset.originalText; // restore text on error
+                btn.disabled = false;
             }
         }
 
@@ -238,26 +295,97 @@
         // Form submission handlers
         // ------------------------------
         async function handleBookingFormSubmit(form, onSuccess) {
-            const formData = new FormData(form);
-            const actionUrl = form.getAttribute('action');
+            // Clear any previous error displays
+            const errorContainer = form.querySelector('#form-errors');
+            if (errorContainer) {
+                errorContainer.classList.add('hidden');
+                errorContainer.querySelector('ul').innerHTML = '';
+            }
+
+            // Validate required fields before submission
+            const valOrEmpty = (sel) => form.querySelector(sel)?.value || "";
+
+            const startTime = valOrEmpty('#hiddenBookingDateTime');
+            const tableId = valOrEmpty('#tableSelect');
+            const numberOfGuests = valOrEmpty('#NumberOfGuests');
+            const name = valOrEmpty('#Name').trim();
+            const phoneNumber = valOrEmpty('#PhoneNumber').trim();
+
+            console.log(startTime);
+            console.log(tableId);
+            console.log(numberOfGuests);
+            console.log(name);
+            console.log(phoneNumber);
+
+            const errors = [];
+            if (!name) errors.push('Customer name is required');
+            if (!phoneNumber) errors.push('Phone number is required');
+            if (!tableId) errors.push('Please select a table');
+            if (!numberOfGuests || numberOfGuests < 1) errors.push('Number of guests must be at least 1');
+            if (!startTime) errors.push('Please select a time slot');
+
+            if (errors.length > 0) {
+                displayFormErrors(form, errors);
+                return;
+            }
+
+            // Create FormData and ensure all fields are included
+            const formData = new FormData();
+            formData.append('Name', name);
+            formData.append('PhoneNumber', phoneNumber);
+            formData.append('TableId', tableId);
+            formData.append('NumberOfGuests', numberOfGuests);
+            formData.append('StartTime', startTime);
+
+            // Add anti-forgery token
+            const token = form.querySelector('input[name="__RequestVerificationToken"]');
+            if (token) {
+                formData.append('__RequestVerificationToken', token.value);
+            }
 
             try {
-                const response = await fetch(actionUrl, {
+                const response = await fetch('/AdminPanel/CreateBooking', {
                     method: 'POST',
                     body: formData
                 });
 
                 if (response.ok) {
-                    showNotification('Booking created successfully!', 'success');
+                    // Check if response is JSON (AJAX) or HTML (redirect)
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const result = await response.json();
+                        showNotification(result.message || 'Booking created successfully!', 'success');
+                    } else {
+                        showNotification('Booking created successfully!', 'success');
+                    }
+
                     if (onSuccess) onSuccess();
+
+                    // Reload any open panels that might need refreshing
+                    const managementPanel = document.getElementById('management-panel');
+                    if (managementPanel.innerHTML.trim() !== '') {
+                        // Refresh the current panel if one is loaded
+                        const panelContent = managementPanel.querySelector('[data-panel-type]');
+                        if (panelContent) {
+                            const panelType = panelContent.dataset.panelType;
+                            loadPanel(panelType);
+                        }
+                    }
                 } else {
-                    const errorText = await response.text();
-                    console.error('Booking creation failed:', errorText);
-                    showNotification('Failed to create booking', 'error');
+                    // Handle error response
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const errorData = await response.json();
+                        displayFormErrors(form, errorData.errors || ['Failed to create booking']);
+                    } else {
+                        const errorText = await response.text();
+                        console.error('Booking creation failed:', errorText);
+                        displayFormErrors(form, ['Failed to create booking. Please try again.']);
+                    }
                 }
             } catch (err) {
                 console.error('Form submission error:', err);
-                showNotification('Failed to submit booking form', 'error');
+                displayFormErrors(form, ['Network error. Please check your connection and try again.']);
             }
         }
 
@@ -290,103 +418,185 @@
             return await handleRegularFormSubmit(form, onSuccess);
         }
 
+        function displayFormErrors(form, errors) {
+            const errorContainer = form.querySelector('#form-errors');
+            if (errorContainer && errors.length > 0) {
+                const errorList = errorContainer.querySelector('ul');
+                errorList.innerHTML = errors.map(error => `<li>${error}</li>`).join('');
+                errorContainer.classList.remove('hidden');
+
+                // Scroll error container into view
+                errorContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
         // ------------------------------
-        // Booking form (table + date + slots)
+        // Booking form (table + date + slots) - 24H FORMAT
         // ------------------------------
         function initializeBookingForm(container) {
             const dateInput = container.querySelector('#bookingDate');
             const tableSelect = container.querySelector('#tableSelect');
-            const slotContainer = container.querySelector('#timeSlotContainer');
-            const hiddenInput = container.querySelector('#hiddenBookingDateTime');
 
-            if (!dateInput || !tableSelect || !slotContainer || !hiddenInput) {
-                console.error('Booking form elements not found');
+            if (!dateInput || !tableSelect) {
+                console.error('Required booking form elements not found');
                 return;
             }
 
-            // Set minimum date to today
-            const today = new Date().toISOString().split('T')[0];
-            dateInput.min = today;
-            dateInput.value = today;
+            // Set date constraints
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
 
-            async function loadAvailableSlots() {
-                const tableId = tableSelect.value;
-                const date = dateInput.value;
+            // Set minimum date to today, default to tomorrow for better UX
+            dateInput.min = today.toISOString().split('T')[0];
+            dateInput.value = tomorrow.toISOString().split('T')[0];
 
-                if (!tableId || !date) {
-                    slotContainer.innerHTML = '<p class="text-gray-500">Please select a table and date first.</p>';
+            // Set maximum date (optional - 90 days from now)
+            const maxDate = new Date(today);
+            maxDate.setDate(maxDate.getDate() + 90);
+            dateInput.max = maxDate.toISOString().split('T')[0];
+
+            // Event listeners with debouncing for better performance
+            let debounceTimeout;
+            const debouncedLoadSlots = () => {
+                clearTimeout(debounceTimeout);
+                debounceTimeout = setTimeout(loadAvailableSlots, 300);
+            };
+
+            dateInput.addEventListener('change', debouncedLoadSlots);
+            tableSelect.addEventListener('change', debouncedLoadSlots);
+
+            // Load initial slots if table is pre-selected
+            if (tableSelect.value && dateInput.value) {
+                setTimeout(loadAvailableSlots, 100);
+            }
+        }
+
+        async function loadAvailableSlots() {
+            const tableSelect = document.querySelector('#tableSelect');
+            const dateInput = document.querySelector('#bookingDate');
+            const slotContainer = document.querySelector('#timeSlotContainer');
+            const hiddenInput = document.querySelector('#hiddenBookingDateTime');
+
+            if (!tableSelect || !dateInput || !slotContainer || !hiddenInput) {
+                console.error('Required form elements not found');
+                return;
+            }
+
+            const tableId = tableSelect.value;
+            const date = dateInput.value;
+
+            if (!tableId || !date) {
+                slotContainer.innerHTML = '<p class="text-gray-500">Please select a table and date first.</p>';
+                hiddenInput.value = '';
+                return;
+            }
+
+            slotContainer.innerHTML = '<p class="text-gray-500">Loading available slots...</p>';
+
+            try {
+                const response = await fetch(`/AdminPanel/GetAvailableSlots?tableId=${tableId}&date=${date}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const slots = await response.json();
+                console.log(slots);
+
+                if (!slots || slots.length === 0) {
+                    slotContainer.innerHTML = '<p class="text-gray-500">No available slots for the selected date and table.</p>';
                     hiddenInput.value = '';
                     return;
                 }
 
-                slotContainer.innerHTML = '<p class="text-gray-500">Loading available slots...</p>';
+                // Create time slot HTML with 24-hour format
+                const slotHTML = slots.map(slot => {
+                    const isAvailable = slot.available;
+                    const timeDisplay = slot.time; // Use 24-hour format directly
 
-                try {
-                    const res = await fetch(`/AdminPanel/GetAvailableSlots?tableId=${tableId}&date=${date}`);
-                    if (!res.ok) {
-                        throw new Error(`HTTP ${res.status}`);
-                    }
-
-                    const slots = await res.json();
-
-                    if (!slots || !slots.length) {
-                        slotContainer.innerHTML = '<p class="text-gray-500">No available slots for selected date/table.</p>';
-                        hiddenInput.value = '';
-                        return;
-                    }
-
-                    slotContainer.innerHTML = `
-                        <label class="block text-gray-700 font-medium mb-2">Select Time Slot *</label>
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                            ${slots.map(s => `
-                                <div class="time-slot px-3 py-2 rounded-lg text-center cursor-pointer border transition-all duration-200
-                                    ${s.Available ? 'bg-green-100 hover:bg-green-200 border-green-300' : 'bg-gray-200 border-gray-300 line-through cursor-not-allowed'}"
-                                    data-time="${s.Time}" ${s.Available ? '' : 'data-disabled="true"'}>
-                                    ${s.Display}
-                                </div>`).join('')}
+                    return `
+                        <div class="time-slot px-3 py-2 rounded-lg text-center cursor-pointer border transition-all duration-200 ${
+                            isAvailable
+                                ? 'bg-green-100 hover:bg-green-200 border-green-300 hover:shadow-md'
+                                : 'bg-gray-200 border-gray-300 text-gray-500 line-through cursor-not-allowed opacity-60'
+                        }"
+                        data-time="${slot.time}"
+                        data-available="${isAvailable}"
+                        ${!isAvailable ? 'title="This time slot is already booked"' : ''}>
+                            <span class="font-medium">${timeDisplay}</span>
+                            ${!isAvailable ? '<br><small class="text-xs">Booked</small>' : ''}
                         </div>
                     `;
+                }).join('');
 
-                    // Add click listeners for available slots
-                    slotContainer.querySelectorAll('.time-slot:not([data-disabled])').forEach(slot => {
-                        slot.addEventListener('click', () => {
-                            // Remove selection from all slots
-                            slotContainer.querySelectorAll('.time-slot').forEach(s => {
-                                s.classList.remove('bg-blue-500', 'text-white', 'border-blue-500');
+                slotContainer.innerHTML = `
+                    <label class="block text-gray-700 font-medium mb-2">
+                        Select Time Slot *
+                        <small class="text-gray-500 font-normal">(Available slots in green)</small>
+                    </label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 mb-2">
+                        ${slotHTML}
+                    </div>
+                    <p class="text-sm text-gray-600 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Click on a green time slot to select it
+                    </p>
+                `;
+
+                // Add click event listeners to available slots
+                slotContainer.querySelectorAll('.time-slot[data-available="true"]').forEach(slot => {
+                    slot.addEventListener('click', function() {
+                        // Remove selection from all slots
+                        slotContainer.querySelectorAll('.time-slot').forEach(s => {
+                            s.classList.remove('bg-blue-500', 'text-white', 'border-blue-600', 'shadow-lg');
+                            if (s.dataset.available === 'true') {
                                 s.classList.add('bg-green-100', 'border-green-300');
-                            });
-
-                            // Select clicked slot
-                            slot.classList.remove('bg-green-100', 'border-green-300');
-                            slot.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
-
-                            // Update hidden input
-                            hiddenInput.value = `${date}T${slot.dataset.time}:00`;
-                            console.log('Selected datetime:', hiddenInput.value);
+                            }
                         });
+
+                        // Apply selection to clicked slot
+                        this.classList.remove('bg-green-100', 'border-green-300');
+                        this.classList.add('bg-blue-500', 'text-white', 'border-blue-600', 'shadow-lg');
+
+                        // Update hidden input with full datetime
+                        const selectedDateTime = `${date}T${this.dataset.time}:00`;
+                        hiddenInput.value = selectedDateTime;
+
+                        console.log('Selected datetime:', selectedDateTime);
                     });
+                });
 
-                    // Auto-select first available slot
-                    const firstAvailable = slotContainer.querySelector('.time-slot:not([data-disabled])');
-                    if (firstAvailable) {
-                        firstAvailable.click();
-                    }
-
-                } catch (err) {
-                    console.error('Failed to load slots:', err);
-                    slotContainer.innerHTML = '<p class="text-red-500">Failed to load available slots.</p>';
-                    hiddenInput.value = '';
+                // Auto-select first available slot if none selected
+                const firstAvailable = slotContainer.querySelector('.time-slot[data-available="true"]');
+                if (firstAvailable && !hiddenInput.value) {
+                    firstAvailable.click();
                 }
-            }
 
-            // Event listeners
-            dateInput.addEventListener('change', loadAvailableSlots);
-            tableSelect.addEventListener('change', loadAvailableSlots);
-
-            // Initial load if table is already selected
-            if (tableSelect.value) {
-                loadAvailableSlots();
+            } catch (error) {
+                console.error('Error loading time slots:', error);
+                slotContainer.innerHTML = `
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <p class="text-red-600">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            Failed to load available time slots. Please try again.
+                        </p>
+                        <button onclick="loadAvailableSlots()" class="text-sm text-red-700 underline mt-2">
+                            Retry
+                        </button>
+                    </div>
+                `;
+                hiddenInput.value = '';
             }
+        }
+
+        // Close quick form function
+        function closeQuickForm(button) {
+            const container = button.closest('.quick-form-container');
+            const triggerButton = container.previousElementSibling;
+            container.classList.add('hidden');
+            container.innerHTML = '';
+            triggerButton.disabled = false;
         }
 
         // ------------------------------
@@ -397,6 +607,137 @@
             const tempError = '@TempData["Error"]';
             if (tempSuccess && tempSuccess !== '') showNotification(tempSuccess, 'success');
             if (tempError && tempError !== '') showNotification(tempError, 'error');
+        });
+    </script>
+
+    @{/* _BookingPanel.cshtml scipts */}
+    <script>
+                function editBooking(id) {
+            const li = document.getElementById(`booking-${id}`);
+            const booking = {
+                CustomerName: li.dataset.customer,
+                CustomerId: li.dataset.customerid,
+                NumberOfGuests: li.dataset.guests,
+                StartTime: li.dataset.start,
+                TableId: li.dataset.table
+            };
+
+            li.innerHTML = `
+                <span>${booking.CustomerName}</span>
+                <input type="number" id="guests-${id}" value="${booking.NumberOfGuests}" min="1" class="border rounded px-2 py-1 mr-2" />
+                <input type="datetime-local" id="start-${id}" value="${booking.StartTime}" class="border rounded px-2 py-1 mr-2" />
+                <button onclick="saveBooking(${id})" class="text-green-600 hover:underline">Save</button>
+                <button onclick="cancelEdit(${id}, '${booking.NumberOfGuests}', '${booking.StartTime}')" class="text-gray-500 hover:underline">Cancel</button>
+            `;
+        }
+
+        async function saveBooking(id) {
+            const li = document.getElementById(`booking-${id}`);
+            const guests = parseInt(document.getElementById(`guests-${id}`).value);
+            const startTime = document.getElementById(`start-${id}`).value;
+            const tableId = li.dataset.table;
+            const customerId = li.dataset.customerid;
+
+            const res = await fetch(`/api/bookings/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    NumberOfGuests: guests,
+                    StartTime: startTime,
+                    TableId: tableId,
+                    CustomerId: customerId
+                })
+            });
+
+            if (res.ok) {
+                // Update the li content directly
+                li.dataset.guests = guests;
+                li.dataset.start = startTime;
+
+                li.innerHTML = `
+                    <div class="booking-display flex-1">
+                        <span>${li.dataset.customer} (${new Date(startTime).toLocaleString()})</span>
+                        <span>Table: ${tableId}</span>
+                        <span>Guests: ${guests}</span>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="editBooking(${id})" class="text-blue-600 hover:underline">Edit</button>
+                        <button onclick="deleteBooking(${id})" class="text-red-600 hover:underline">Delete</button>
+                    </div>
+                `;
+            } else {
+                const data = await res.json();
+                alert('Failed to update booking: ' + (data.message || 'Unknown error'));
+            }
+        }
+
+        function cancelEdit(id, originalGuests, originalStart) {
+            const li = document.getElementById(`booking-${id}`);
+            li.innerHTML = `
+                <div class="booking-display flex-1">
+                    <span>${li.dataset.customer} (${new Date(originalStart).toLocaleString()})</span>
+                    <span>Table: ${li.dataset.table}</span>
+                    <span>Guests: ${originalGuests}</span>
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="editBooking(${id})" class="text-blue-600 hover:underline">Edit</button>
+                    <button onclick="deleteBooking(${id})" class="text-red-600 hover:underline">Delete</button>
+                </div>
+            `;
+        }
+
+        async function deleteBooking(id) {
+            if (!confirm("Are you sure you want to delete this booking?")) return;
+
+            const res = await fetch(`/api/bookings/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                document.getElementById(`booking-${id}`).remove();
+            } else {
+                const data = await res.json();
+                alert('Failed to delete booking: ' + (data.message || 'Unknown error'));
+            }
+        }
+    </script>
+
+    @{
+        /* _BookingPanel.cshtml scipts */
+    }
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('form[action="/AdminPanel/CreateMenuItem"]');
+            if (!form) return;
+
+            const errorsDiv = form.querySelector('#form-errors');
+            const successDiv = form.querySelector('#form-success');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                errorsDiv.classList.add('hidden');
+                successDiv.classList.add('hidden');
+
+                const formData = new FormData(form);
+
+                const res = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (res.ok) {
+                    successDiv.querySelector('p').textContent = 'Menu item added successfully!';
+                    successDiv.classList.remove('hidden');
+                    form.reset();
+                } else {
+                    const data = await res.json();
+                    const ul = errorsDiv.querySelector('ul');
+                    ul.innerHTML = '';
+                    data.errors?.forEach(err => {
+                        const li = document.createElement('li');
+                        li.textContent = err;
+                        ul.appendChild(li);
+                    });
+                    errorsDiv.classList.remove('hidden');
+                }
+            });
         });
     </script>
 }

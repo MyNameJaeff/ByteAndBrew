@@ -13,7 +13,11 @@ namespace ByteAndBrew.Dtos.Booking
         [Required]
         public int TableId { get; set; }
 
-        [Required]
-        public int CustomerId { get; set; }
+        // Optional
+        public int? CustomerId { get; set; }
+
+        public string? CustomerPhoneNumber { get; set; }
+
+        public string? CustomerName { get; set; }
     }
 }
