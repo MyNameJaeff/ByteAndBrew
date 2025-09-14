@@ -563,5 +563,131 @@ namespace ByteAndBrew.Controllers
             var errorContent = await response.Content.ReadAsStringAsync();
             return BadRequest(new { success = false, message = $"Failed to update booking: {errorContent}" });
         }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteMenuItem(int id)
+        {
+            if (!IsAuthenticated())
+            {
+                return Unauthorized();
+            }
+
+            try
+            {
+                using var client = CreateAuthenticatedClient();
+                var response = await client.DeleteAsync($"MenuItems/{id}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return Ok(new { success = true, message = "Menu item deleted successfully" });
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return BadRequest(new { success = false, message = $"Failed to delete menu item: {errorContent}" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "An error occurred while deleting the menu item" });
+            }
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateMenuItem(int id, [FromBody] MenuItemUpdateDto dto)
+        {
+            if (!IsAuthenticated())
+            {
+                return Unauthorized();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
+                });
+            }
+
+            try
+            {
+                using var client = CreateAuthenticatedClient();
+                var response = await client.PutAsJsonAsync($"MenuItems/{id}", dto);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return Ok(new { success = true, message = "Menu item updated successfully" });
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return BadRequest(new { success = false, message = $"Failed to update menu item: {errorContent}" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "An error occurred while updating the menu item" });
+            }
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteTable(int id)
+        {
+            if (!IsAuthenticated())
+            {
+                return Unauthorized();
+            }
+
+            try
+            {
+                using var client = CreateAuthenticatedClient();
+                var response = await client.DeleteAsync($"Tables/{id}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return Ok(new { success = true, message = "Table deleted successfully" });
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return BadRequest(new { success = false, message = $"Failed to delete table: {errorContent}" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "An error occurred while deleting the table" });
+            }
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateTable(int id, [FromBody] TableUpdateDto dto)
+        {
+            if (!IsAuthenticated())
+            {
+                return Unauthorized();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
+                });
+            }
+
+            try
+            {
+                using var client = CreateAuthenticatedClient();
+                var response = await client.PutAsJsonAsync($"Tables/{id}", dto);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return Ok(new { success = true, message = "Table updated successfully" });
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return BadRequest(new { success = false, message = $"Failed to update table: {errorContent}" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "An error occurred while updating the table" });
+            }
+        }
     }
 }

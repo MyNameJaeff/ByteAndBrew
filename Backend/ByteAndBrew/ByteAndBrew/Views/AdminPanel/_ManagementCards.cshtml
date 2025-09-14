@@ -1,0 +1,38 @@
+﻿@* Cards for Bookings, Menu, Tables *@
+<div class="space-y-6 md:space-y-0 md:grid md:grid-cols-3 md:gap-6">
+    <!-- Bookings Card -->
+    <div class="bg-white rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-200 p-6 text-center">
+        <div class="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-calendar-check text-3xl text-blue-600"></i>
+        </div>
+        <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Manage Bookings</h3>
+        <p class="text-gray-600 mb-4 text-sm sm:text-base">View, create, edit and delete customer bookings.</p>
+        <button onclick="loadPanel('Bookings')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 rounded-xl font-medium shadow-lg w-full">
+            Manage Bookings
+        </button>
+    </div>
+
+    <!-- Menu Card -->
+    <div class="bg-white rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-200 p-6 text-center">
+        <div class="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-utensils text-3xl text-green-600"></i>
+        </div>
+        <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Manage Menu</h3>
+        <p class="text-gray-600 mb-4 text-sm sm:text-base">Add, update and remove items from the restaurant menu.</p>
+        <button onclick="loadPanel('MenuItems')" class="bg-green-600 hover:bg-green-700 text-white px-4 sm:px-6 py-2 rounded-xl font-medium shadow-lg w-full">
+            Manage Menu
+        </button>
+    </div>
+
+    <!-- Tables Card -->
+    <div class="bg-white rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-200 p-6 text-center">
+        <div class="bg-yellow-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-chair text-3xl text-yellow-600"></i>
+        </div>
+        <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Manage Tables</h3>
+        <p class="text-gray-600 mb-4 text-sm sm:text-base">Configure restaurant tables and seating capacity.</p>
+        <button onclick="loadPanel('Tables')" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 sm:px-6 py-2 rounded-xl font-medium shadow-lg w-full">
+            Manage Tables
+        </button>
+    </div>
+</div>

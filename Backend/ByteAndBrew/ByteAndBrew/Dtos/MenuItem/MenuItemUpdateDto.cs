@@ -7,7 +7,8 @@ namespace ByteAndBrew.Dtos.MenuItem
         [Required, StringLength(100)]
         public string Name { get; set; } = default!;
 
-        [Required, Range(0.1, 9999.99)]
+        [Required]
+        [Range(0, double.MaxValue, ErrorMessage = "Price must be non-negative")]
         public decimal Price { get; set; }
 
         [Required, StringLength(500)]

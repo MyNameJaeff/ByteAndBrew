@@ -1,31 +1,31 @@
 ﻿@model ByteAndBrew.Models.MenuItem
 
-<div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden max-w-sm mx-auto mb-6">
-    <div class="relative h-48 overflow-hidden">
+<div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden max-w-sm w-full mx-auto mb-6">
+    <div class="relative h-48 sm:h-56 md:h-60 overflow-hidden">
         @if (!string.IsNullOrEmpty(Model.ImageUrl))
         {
             <img src="@Model.ImageUrl" alt="@Model.Name" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
         }
         else
         {
-            <div class="w-full h-full bg-gradient-to-br from-amber-800 to-yellow-600 flex items-center justify-center text-white text-5xl">
+            <div class="w-full h-full bg-gradient-to-br from-amber-800 to-yellow-600 flex items-center justify-center text-white text-4xl sm:text-5xl">
                 <i class="fas fa-coffee"></i>
             </div>
         }
         @if (Model.IsPopular)
         {
-            <div class="absolute top-3 right-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-md">
+            <div class="absolute top-3 right-3 bg-red-500 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-semibold shadow-md">
                 Popular
             </div>
         }
     </div>
-    <div class="p-5">
-        <div class="flex justify-between items-start mb-3">
-            <h3 class="text-xl font-semibold text-gray-800 flex-1 pr-2">@Model.Name</h3>
-            <span class="bg-gradient-to-r from-amber-800 to-yellow-600 text-white px-4 py-2 rounded-full font-bold text-lg whitespace-nowrap">
+    <div class="p-4 sm:p-5">
+        <div class="flex flex-col sm:flex-row justify-between items-start mb-3">
+            <h3 class="text-lg sm:text-xl font-semibold text-gray-800 flex-1 pr-0 sm:pr-2 mb-2 sm:mb-0">@Model.Name</h3>
+            <span class="bg-gradient-to-r from-amber-800 to-yellow-600 text-white px-3 py-1 sm:px-4 sm:py-2 rounded-full font-bold text-base sm:text-lg whitespace-nowrap">
                 @Model.Price.ToString("C")
             </span>
         </div>
-        <p class="text-gray-600 mb-5 leading-relaxed text-sm">@Model.Description</p>
+        <p class="text-gray-600 mb-4 sm:mb-5 text-sm sm:text-base leading-relaxed">@Model.Description</p>
     </div>
 </div>

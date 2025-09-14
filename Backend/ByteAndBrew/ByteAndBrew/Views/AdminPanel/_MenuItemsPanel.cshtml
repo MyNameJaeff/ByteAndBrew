@@ -1,24 +1,87 @@
 ﻿@model List<ByteAndBrew.Models.MenuItem>
-
 <div class="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 mt-6">
-    <h3 class="text-xl font-bold text-gray-900 mb-4">Menu Items</h3>
+    <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl font-bold text-gray-900 flex items-center">
+            <i class="fas fa-utensils text-green-600 mr-3"></i>
+            Menu Items Management
+        </h3>
+        <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
+            @Model.Count() @(Model.Count() == 1 ? "item" : "items")
+        </span>
+    </div>
+
     @if (!Model.Any())
     {
-        <p class="text-gray-500">No menu items found.</p>
+        <div class="text-center py-12">
+            <i class="fas fa-utensils text-gray-300 text-6xl mb-4"></i>
+            <p class="text-gray-500 text-lg mb-2">No menu items found</p>
+            <p class="text-gray-400 text-sm">Add your first menu item using the quick actions below</p>
+        </div>
     }
     else
     {
-        <ul class="space-y-2">
+        <div class="space-y-4">
             @foreach (var item in Model)
             {
-                <li class="flex justify-between items-center p-3 border border-gray-100 rounded-lg">
-                    <span>@item.Name (@item.Price.ToString("C"))</span>
-                    <div class="space-x-2">
-                        <a href="@Url.Action("EditMenuItem", "AdminPanel", new { id = item.Id })" class="text-blue-600 hover:underline">Edit</a>
-                        <button onclick="deleteItem('MenuItem', @item.Id, this)" class="text-red-600 hover:underline">Delete</button>
+                <div id="menuitem-@item.Id"
+                     class="group bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 hover:border-green-300 rounded-xl p-5 transition-all duration-200 hover:shadow-lg"
+                     data-name="@item.Name"
+                     data-description="@item.Description"
+                     data-price="@item.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                     data-image="@item.ImageUrl"
+                     data-popular="@item.IsPopular">
+                    <div class="menuitem-display flex items-start justify-between">
+                        <div class="flex space-x-4 flex-1">
+                            @if (!string.IsNullOrEmpty(item.ImageUrl))
+                            {
+                                <div class="flex-shrink-0">
+                                    <img src="@item.ImageUrl" alt="@item.Name"
+                                         class="w-20 h-20 object-cover rounded-lg border-2 border-gray-200" />
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="flex-shrink-0">
+                                    <div class="w-20 h-20 bg-green-100 rounded-lg flex items-center justify-center border-2 border-gray-200">
+                                        <i class="fas fa-image text-green-600 text-2xl"></i>
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-bold text-lg text-gray-900 mb-1 flex items-center space-x-2">
+                                    <span>@item.Name</span>
+                                    @if (item.IsPopular)
+                                    {
+                                        <span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full text-xs font-semibold">
+                                            Popular!
+                                        </span>
+                                    }
+                                </h4>
+
+                                <p class="text-gray-600 text-sm mb-2 line-clamp-2">@item.Description</p>
+
+                                <div class="flex items-center space-x-4 mt-1">
+                                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full font-bold text-sm">
+                                        @item.Price.ToString("C")
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex space-x-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-4">
+                            <button onclick="editMenuItem(@item.Id)"
+                                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
+                                <i class="fas fa-edit mr-2"></i>Edit
+                            </button>
+                            <button onclick="deleteMenuItem(@item.Id)"
+                                    class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
+                                <i class="fas fa-trash mr-2"></i>Delete
+                            </button>
+                        </div>
                     </div>
-                </li>
+                </div>
             }
-        </ul>
+        </div>
     }
 </div>

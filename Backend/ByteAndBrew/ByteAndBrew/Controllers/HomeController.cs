@@ -13,12 +13,25 @@ namespace ByteAndBrew.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Want to fetch this "https://localhost:7145/api/MenuItems/popular"
             var response = await _client.GetAsync("MenuItems/popular");
+
+            if (!response.IsSuccessStatusCode)
+                return View(new List<MenuItem>()); // fallback empty list
 
             var popularItems = await response.Content.ReadFromJsonAsync<List<MenuItem>>();
 
-            return View(popularItems);
+            if (popularItems == null || !popularItems.Any())
+                return View(new List<MenuItem>()); // fallback empty list
+
+            // Shuffle and take max 20 items
+            var random = new Random();
+            var randomPopularItems = popularItems
+                .OrderBy(x => random.Next())
+                .Take(20)
+                .ToList();
+
+            return View(randomPopularItems);
         }
+
     }
 }
