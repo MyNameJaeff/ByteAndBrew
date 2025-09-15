@@ -145,13 +145,6 @@ namespace ByteAndBrew.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateBooking(BookingAndCustomerCreateDto model)
         {
-            Debug.WriteLine("CreateBooking - Received model:");
-            Debug.WriteLine($"Name: '{model.Name}'");
-            Debug.WriteLine($"PhoneNumber: '{model.PhoneNumber}'");
-            Debug.WriteLine($"StartTime: {model.StartTime}");
-            Debug.WriteLine($"NumberOfGuests: {model.NumberOfGuests}");
-            Debug.WriteLine($"TableId: {model.TableId}");
-
             if (!IsAuthenticated())
             {
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -411,24 +404,28 @@ namespace ByteAndBrew.Controllers
             if (!response.IsSuccessStatusCode)
             {
                 ViewBag.Tables = new List<SelectListItem>();
+                ViewBag.TableCapacities = new Dictionary<string, int>();
                 return PartialView("_CreateBookingPanel", new BookingAndCustomerCreateDto());
             }
 
-            // Deserialize the JSON into TableReadDto list
             var tables = await response.Content.ReadFromJsonAsync<List<TableReadDto>>();
 
-            Debug.WriteLine(tables);
-
-            // Map to SelectListItem for Razor dropdown
+            // Map to SelectListItem
             ViewBag.Tables = tables?.Select(t => new SelectListItem
             {
                 Value = t.Id.ToString(),
                 Text = $"Table {t.TableNumber} ({t.Capacity} seats)"
             }).ToList() ?? new List<SelectListItem>();
 
+            ViewBag.TableCapacities = tables?.ToDictionary(
+                t => t.Id.ToString(),
+                t => t.Capacity
+            ) ?? new Dictionary<string, int>();
+            Debug.WriteLine("Capacities: " + System.Text.Json.JsonSerializer.Serialize((object)ViewBag.TableCapacities));
+
+
             return PartialView("_CreateBookingPanel", new BookingAndCustomerCreateDto());
         }
-
 
         public IActionResult GetCreateMenuItemPanel()
         {

@@ -3,10 +3,10 @@
 }
 @model List<ByteAndBrew.Dtos.Booking.BookingReadDetailedDto>
 
-<div class="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 mt-6">
-    <div class="flex items-center justify-between mb-6">
-        <h3 class="text-2xl font-bold text-gray-900 flex items-center">
-            <i class="fas fa-calendar-alt text-blue-600 mr-3"></i>
+<div class="bg-white rounded-2xl shadow-xl border border-gray-200 p-4 sm:p-6 mt-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-3 sm:space-y-0">
+        <h3 class="text-xl sm:text-2xl font-bold text-gray-900 flex items-center">
+            <i class="fas fa-calendar-alt text-blue-600 mr-2 sm:mr-3"></i>
             Bookings Management
         </h3>
         <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
@@ -17,9 +17,9 @@
     @if (!Model.Any())
     {
         <div class="text-center py-12">
-            <i class="fas fa-calendar-alt text-gray-300 text-6xl mb-4"></i>
-            <p class="text-gray-500 text-lg mb-2">No bookings found</p>
-            <p class="text-gray-400 text-sm">Add a booking using the quick actions below</p>
+            <i class="fas fa-calendar-alt text-gray-300 text-5xl sm:text-6xl mb-4"></i>
+            <p class="text-gray-500 text-base sm:text-lg mb-2">No bookings found</p>
+            <p class="text-gray-400 text-xs sm:text-sm">Add a booking using the quick actions below</p>
         </div>
     }
     else
@@ -28,34 +28,34 @@
             @foreach (var booking in Model)
             {
                 <div id="booking-@booking.Id"
-                     class="group bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 hover:border-blue-300 rounded-xl p-5 transition-all duration-200 hover:shadow-md"
+                     class="group bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 hover:border-blue-300 rounded-xl p-3 sm:p-5 transition-all duration-200 hover:shadow-md"
                      data-customer="@booking.CustomerName"
                      data-customerid="@booking.CustomerId"
                      data-guests="@booking.NumberOfGuests"
                      data-start="@booking.StartTime.ToString("yyyy-MM-ddTHH:mm")"
                      data-table="@booking.TableId">
-                    <div class="booking-display flex items-center justify-between">
-                        <div class="flex items-center space-x-4">
-                            <div class="bg-blue-100 p-3 rounded-lg">
+                    <div class="booking-display flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
+                        <div class="flex items-center space-x-3 sm:space-x-4">
+                            <div class="bg-blue-100 p-3 rounded-lg flex-shrink-0">
                                 <i class="fas fa-user text-blue-600 text-xl"></i>
                             </div>
                             <div>
                                 <h4 class="font-bold text-lg text-gray-900">@booking.CustomerName</h4>
-                                <div class="flex flex-wrap text-gray-600 mt-1 space-x-4">
+                                <div class="flex flex-wrap text-gray-600 mt-1 gap-2 sm:gap-4 text-sm sm:text-base">
                                     <span><i class="fas fa-calendar-alt mr-1"></i>@booking.StartTime.ToString("dd MMM yyyy HH:mm")</span>
                                     <span><i class="fas fa-chair mr-1"></i>Table: @booking.TableNumber</span>
                                     <span><i class="fas fa-users mr-1"></i>Guests: @booking.NumberOfGuests</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex space-x-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <div class="flex space-x-2 sm:space-x-3 justify-end md:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                             <button onclick="editBooking(@booking.Id)"
-                                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium flex items-center">
-                                <i class="fas fa-edit mr-2"></i>Edit
+                                    class="bg-blue-500 hover:bg-blue-600 grow md:grow-0 text-white px-3 sm:px-4 py-2 rounded-lg font-medium flex items-center text-sm sm:text-base">
+                                <i class="fas fa-edit mr-1 sm:mr-2"></i>Edit
                             </button>
                             <button onclick="deleteBooking(@booking.Id)"
-                                    class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium flex items-center">
-                                <i class="fas fa-trash mr-2"></i>Delete
+                                    class="bg-red-500 hover:bg-red-600 grow md:grow-0 text-white px-3 sm:px-4 py-2 rounded-lg font-medium flex items-center text-sm sm:text-base">
+                                <i class="fas fa-trash mr-1 sm:mr-2"></i>Delete
                             </button>
                         </div>
                     </div>

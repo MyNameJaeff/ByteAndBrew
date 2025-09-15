@@ -195,12 +195,6 @@ async function handleBookingFormSubmit(form, onSuccess) {
     const name = valOrEmpty('#Name').trim();
     const phoneNumber = valOrEmpty('#PhoneNumber').trim();
 
-    console.log(startTime);
-    console.log(tableId);
-    console.log(numberOfGuests);
-    console.log(name);
-    console.log(phoneNumber);
-
     const errors = [];
     if (!name) errors.push('Customer name is required');
     if (!phoneNumber) errors.push('Phone number is required');
@@ -318,15 +312,35 @@ function displayFormErrors(form, errors) {
 }
 
 // ------------------------------
-// Booking form (table + date + slots) - 24H FORMAT
+// Enhanced Booking form (table + date + slots) - 24H FORMAT with table capacities
 // ------------------------------
 function initializeBookingForm(container) {
     const dateInput = container.querySelector('#bookingDate');
     const tableSelect = container.querySelector('#tableSelect');
+    const guestsInput = container.querySelector('#NumberOfGuests');
 
     if (!dateInput || !tableSelect) {
         console.error('Required booking form elements not found');
         return;
+    }
+
+    // Get table capacities from the data attribute
+    const createBookingPanel = container.querySelector('#createBookingPanel');
+    let tableCapacities = {};
+
+    if (createBookingPanel) {
+        const tableCapacitiesData = createBookingPanel.dataset.tableCapacities;
+        console.log('Raw table capacities data:', tableCapacitiesData);
+
+        try {
+            tableCapacities = JSON.parse(tableCapacitiesData || '{}');
+            console.log('Parsed table capacities:', tableCapacities);
+        } catch (e) {
+            console.error('Error parsing table capacities:', e);
+            tableCapacities = {};
+        }
+    } else {
+        console.warn('createBookingPanel element not found for capacities');
     }
 
     // Set date constraints
@@ -342,6 +356,42 @@ function initializeBookingForm(container) {
     const maxDate = new Date(today);
     maxDate.setDate(maxDate.getDate() + 90);
     dateInput.max = maxDate.toISOString().split('T')[0];
+
+    // Table capacity handling
+    if (tableSelect && guestsInput) {
+        tableSelect.addEventListener('change', function () {
+            const selectedTableId = this.value;
+            const capacity = tableCapacities[selectedTableId];
+
+            if (capacity) {
+                guestsInput.max = capacity;
+                // If current guests exceed capacity, reset to capacity
+                if (parseInt(guestsInput.value) > capacity) {
+                    guestsInput.value = capacity;
+                }
+
+                // Update placeholder to show capacity
+                guestsInput.placeholder = `Max ${capacity} guests`;
+                console.log(`Table ${selectedTableId} selected, capacity: ${capacity}`);
+            } else {
+                guestsInput.max = 10; // Default fallback
+                guestsInput.placeholder = "Number of guests";
+                console.log(`No capacity data found for table ${selectedTableId}`);
+            }
+        });
+
+        // Validate guests input
+        guestsInput.addEventListener('input', function () {
+            const selectedTableId = tableSelect.value;
+            const capacity = tableCapacities[selectedTableId];
+            const currentGuests = parseInt(this.value);
+
+            if (capacity && currentGuests > capacity) {
+                this.value = capacity;
+                showNotification(`Maximum ${capacity} guests allowed for this table`, 'error');
+            }
+        });
+    }
 
     // Event listeners with debouncing for better performance
     let debounceTimeout;
@@ -389,7 +439,6 @@ async function loadAvailableSlots() {
         }
 
         const slots = await response.json();
-        console.log(slots);
 
         if (!slots || slots.length === 0) {
             slotContainer.innerHTML = '<p class="text-gray-500">No available slots for the selected date and table.</p>';
@@ -523,10 +572,13 @@ function editBooking(id) {
 
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Start Time *
+                    Booking Date *
                 </label>
-                <input type="datetime-local" id="start-${id}" value="${booking.StartTime}"
-                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 font-bold text-lg" />
+                <input type="date" id="bookingDate-${id}" 
+                       value="${booking.StartTime.split('T')[0]}"
+                       min="${new Date().toISOString().split('T')[0]}"
+                       max="${new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}"
+                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 font-bold text-lg" />
             </div>
 
             <div>
@@ -537,6 +589,15 @@ function editBooking(id) {
                     class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed" />
             </div>
         </div>
+
+        <div class="mb-4 mt-4" id="timeSlotContainer-${id}">
+            <p class="text-gray-500 text-center py-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                <i class="fas fa-clock mr-2"></i>
+                Please select a date to view available time slots.
+            </p>
+        </div>
+
+        <input type="hidden" id="hiddenBookingDateTime-${id}" value="${booking.StartTime}" />
 
         <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-blue-200">
             <button onclick="cancelEditBooking(${id}, '${booking.NumberOfGuests}', '${booking.StartTime}')"
@@ -550,20 +611,103 @@ function editBooking(id) {
         </div>
     </div>
     `;
+
+    // Attach date change listener to load available slots
+    const dateInput = document.getElementById(`bookingDate-${id}`);
+    dateInput.addEventListener('change', () => loadAvailableSlotsForEdit(id));
+    // Load slots initially
+    loadAvailableSlotsForEdit(id);
 }
+
+async function loadAvailableSlotsForEdit(id) {
+    const tableId = document.getElementById(`table-${id}`).value;
+    const date = document.getElementById(`bookingDate-${id}`).value;
+    const slotContainer = document.getElementById(`timeSlotContainer-${id}`);
+    const hiddenInput = document.getElementById(`hiddenBookingDateTime-${id}`);
+
+    if (!tableId || !date) {
+        slotContainer.innerHTML = '<p class="text-gray-500">Please select a table and date first.</p>';
+        hiddenInput.value = '';
+        return;
+    }
+
+    slotContainer.innerHTML = '<p class="text-gray-500">Loading available slots...</p>';
+
+    try {
+        const res = await fetch(`/AdminPanel/GetAvailableSlots?tableId=${tableId}&date=${date}`);
+        const slots = await res.json();
+
+        if (!slots || slots.length === 0) {
+            slotContainer.innerHTML = '<p class="text-gray-500">No available slots for this date.</p>';
+            hiddenInput.value = '';
+            return;
+        }
+
+        const slotHTML = slots.map(slot => {
+            return `
+            <div class="time-slot px-3 py-2 rounded-lg text-center cursor-pointer border transition-all duration-200 ${slot.available
+                    ? 'bg-green-100 hover:bg-green-200 border-green-300 hover:shadow-md'
+                    : 'bg-gray-200 border-gray-300 text-gray-500 line-through cursor-not-allowed opacity-60'}"
+                data-time="${slot.time}" data-available="${slot.available}" ${!slot.available ? 'title="Booked"' : ''}>
+                <span class="font-medium">${slot.time}</span>
+                ${!slot.available ? '<br><small class="text-xs">Booked</small>' : ''}
+            </div>`;
+        }).join('');
+
+        slotContainer.innerHTML = `
+            <label class="block text-gray-700 font-medium mb-2">
+                Select Time Slot *
+            </label>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
+                ${slotHTML}
+            </div>`;
+
+        // Attach click events
+        slotContainer.querySelectorAll('.time-slot[data-available="true"]').forEach(slot => {
+            slot.addEventListener('click', function () {
+                slotContainer.querySelectorAll('.time-slot').forEach(s => {
+                    s.classList.remove('bg-blue-500', 'text-white', 'border-blue-600', 'shadow-lg');
+                    if (s.dataset.available === 'true') s.classList.add('bg-green-100', 'border-green-300');
+                });
+                this.classList.remove('bg-green-100', 'border-green-300');
+                this.classList.add('bg-blue-500', 'text-white', 'border-blue-600', 'shadow-lg');
+                hiddenInput.value = `${date}T${this.dataset.time}:00`;
+            });
+        });
+
+        // Auto-select first available slot if current time matches
+        const currentSlot = slots.find(s => `${date}T${s.time}:00` === hiddenInput.value);
+        if (currentSlot) {
+            const el = slotContainer.querySelector(`.time-slot[data-time="${currentSlot.time}"]`);
+            if (el) el.click();
+        } else {
+            const first = slotContainer.querySelector('.time-slot[data-available="true"]');
+            if (first) first.click();
+        }
+
+    } catch (err) {
+        console.error(err);
+        slotContainer.innerHTML = '<p class="text-red-500">Failed to load time slots.</p>';
+        hiddenInput.value = '';
+    }
+}
+
 
 async function saveBooking(id) {
     const li = document.getElementById(`booking-${id}`);
     const guests = parseInt(document.getElementById(`guests-${id}`).value);
-    const startTime = document.getElementById(`start-${id}`).value;
+    const startTime = document.getElementById(`hiddenBookingDateTime-${id}`).value;
     const tableId = li.dataset.table;
     const customerId = li.dataset.customerid;
 
+    if (!startTime) {
+        alert('Please select a date and time slot before saving.');
+        return;
+    }
+
     const res = await fetch(`/api/bookings/${id}`, {
         method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             NumberOfGuests: guests,
             StartTime: startTime,
@@ -578,16 +722,41 @@ async function saveBooking(id) {
         li.dataset.start = startTime;
 
         li.innerHTML = `
-    <div class="booking-display flex-1">
-        <span>${li.dataset.customer} (${new Date(startTime).toLocaleString()})</span>
-        <span>Table: ${tableId}</span>
-        <span>Guests: ${guests}</span>
-    </div>
-    <div class="flex space-x-2">
-        <button onclick="editBooking(${id})" class="text-blue-600 hover:underline">Edit</button>
-        <button onclick="deleteBooking(${id})" class="text-red-600 hover:underline">Delete</button>
-    </div>
-    `;
+        <div class="booking-display flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="bg-blue-100 p-3 rounded-lg">
+                    <i class="fas fa-user text-blue-600 text-xl"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg text-gray-900">${li.dataset.customer}</h4>
+                    <div class="flex flex-wrap text-gray-600 mt-1 space-x-4">
+                        <span>
+                            <i class="fas fa-calendar-alt mr-1"></i>
+                            ${new Date(startTime).toLocaleString('en-GB', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: false
+                            })}
+                        </span>
+                        <span><i class="fas fa-chair mr-1"></i>Table: ${tableId}</span>
+                        <span><i class="fas fa-users mr-1"></i>Guests: ${guests}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex space-x-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <button onclick="editBooking(${id})"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium flex items-center">
+                    <i class="fas fa-edit mr-2"></i>Edit
+                </button>
+                <button onclick="deleteBooking(${id})"
+                    class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium flex items-center">
+                    <i class="fas fa-trash mr-2"></i>Delete
+                </button>
+            </div>
+        </div>`;
     } else {
         const data = await res.json();
         alert('Failed to update booking: ' + (data.message || 'Unknown error'));
@@ -596,24 +765,45 @@ async function saveBooking(id) {
 
 function cancelEditBooking(id, originalGuests, originalStart) {
     const li = document.getElementById(`booking-${id}`);
+
     li.innerHTML = `
-    <div class="booking-display flex-1">
-        <span>${li.dataset.customer} (${new Date(originalStart).toLocaleString()})</span>
-        <span>Table: ${li.dataset.table}</span>
-        <span>Guests: ${originalGuests}</span>
-    </div>
-    <div class="flex space-x-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <button onclick="editBooking(${id})"
-            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium flex items-center">
-            <i class="fas fa-edit mr-2"></i>Edit
-        </button>
-        <button onclick="deleteBooking(${id})"
-            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium flex items-center">
-            <i class="fas fa-trash mr-2"></i>Delete
-        </button>
+    <div class="booking-display flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+            <div class="bg-blue-100 p-3 rounded-lg">
+                <i class="fas fa-user text-blue-600 text-xl"></i>
+            </div>
+            <div>
+                <h4 class="font-bold text-lg text-gray-900">${li.dataset.customer}</h4>
+                <div class="flex flex-wrap text-gray-600 mt-1 space-x-4">
+                    <i class="fas fa-calendar-alt mr-1"></i>
+                        ${new Date(originalStart).toLocaleString('en-GB', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                        })}
+                    </span>
+                    <span><i class="fas fa-chair mr-1"></i>Table: ${li.dataset.table}</span>
+                    <span><i class="fas fa-users mr-1"></i>Guests: ${originalGuests}</span>
+                </div>
+            </div>
+        </div>
+        <div class="flex space-x-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <button onclick="editBooking(${id})"
+                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium flex items-center">
+                <i class="fas fa-edit mr-2"></i>Edit
+            </button>
+            <button onclick="deleteBooking(${id})"
+                class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium flex items-center">
+                <i class="fas fa-trash mr-2"></i>Delete
+            </button>
+        </div>
     </div>
     `;
 }
+
 
 async function deleteBooking(id) {
     if (!confirm("Are you sure you want to delete this booking?")) return;
@@ -673,7 +863,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ------------------------------
 function editMenuItem(id) {
     const div = document.getElementById(`menuitem-${id}`);
-    console.log(div.dataset.popular);
+
     const menuItem = {
         name: div.dataset.name,
         description: div.dataset.description,
