@@ -23,11 +23,11 @@ namespace ByteAndBrew.Controllers
             if (popularItems == null || !popularItems.Any())
                 return View(new List<MenuItem>()); // fallback empty list
 
-            // Shuffle and take max 20 items
+            // Shuffle and take max 8 items
             var random = new Random();
             var randomPopularItems = popularItems
                 .OrderBy(x => random.Next())
-                .Take(20)
+                .Take(8)
                 .ToList();
 
             return View(randomPopularItems);

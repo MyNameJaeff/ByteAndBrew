@@ -33,28 +33,39 @@ function showNotification(message, type = 'success') {
 // Load management panels
 // ------------------------------
 async function loadPanel(type) {
-    const container = document.getElementById("management-panel");
+    let container;
 
-    // Find the button that was clicked
+    // Kolla om liten skärm
+    if (window.matchMedia("(max-width: 640px)").matches) {
+        container = document.getElementById(`management-panel-${type}`);
+    } else {
+        container = document.getElementById("management-panel");
+    }
+
+    if (!container) return; // inget target-element hittat
+
+    // Hitta knappen som klickades
     const btn = document.querySelector(`button[onclick="loadPanel('${type}')"]`);
 
-    // Toggle: if already loaded and visible, hide it
+    // Toggle
     const currentType = container.dataset.panelType;
     if (currentType === type && container.innerHTML.trim() !== '') {
         container.innerHTML = '';
         container.removeAttribute('data-panel-type');
-        btn.textContent = `Manage ${type}`; // restore original text
+        btn.textContent = `Manage ${type}`;
         return;
     }
 
-    // Close any other open panel first
-    const otherPanel = document.getElementById("management-panel");
-    if (otherPanel.dataset.panelType && otherPanel.dataset.panelType !== type) {
-        const otherType = otherPanel.dataset.panelType;
-        const otherBtn = document.querySelector(`button[onclick="loadPanel('${otherType}')"]`);
-        otherPanel.innerHTML = '';
-        otherPanel.removeAttribute('data-panel-type');
-        if (otherBtn) otherBtn.textContent = `Manage ${otherType}`;
+    // Close any other open panel first (endast för stora skärmar)
+    if (!window.matchMedia("(max-width: 640px)").matches) {
+        const otherPanel = document.getElementById("management-panel");
+        if (otherPanel.dataset.panelType && otherPanel.dataset.panelType !== type) {
+            const otherType = otherPanel.dataset.panelType;
+            const otherBtn = document.querySelector(`button[onclick="loadPanel('${otherType}')"]`);
+            otherPanel.innerHTML = '';
+            otherPanel.removeAttribute('data-panel-type');
+            if (otherBtn) otherBtn.textContent = `Manage ${otherType}`;
+        }
     }
 
     // Set the current panel type
@@ -65,7 +76,7 @@ async function loadPanel(type) {
         <p class="text-gray-500 mt-4">Loading...</p>
     </div>
     `;
-    btn.textContent = `Close ${type}`; // change text
+    btn.textContent = `Close ${type}`;
 
     try {
         const response = await fetch(`/AdminPanel/Get${type}Panel`);
@@ -75,7 +86,7 @@ async function loadPanel(type) {
     } catch (err) {
         container.innerHTML = '<p class="text-red-500 p-4">Failed to load panel</p>';
         showNotification('Failed to load panel', 'error');
-        btn.textContent = `Manage ${type}`; // restore text on error
+        btn.textContent = `Manage ${type}`;
     }
 }
 
@@ -539,7 +550,8 @@ function editBooking(id) {
         CustomerId: li.dataset.customerid,
         NumberOfGuests: li.dataset.guests,
         StartTime: li.dataset.start,
-        TableId: li.dataset.table
+        TableId: li.dataset.table,
+        tableCapacity: li.dataset.capacity
     };
 
     li.innerHTML = `
@@ -566,7 +578,7 @@ function editBooking(id) {
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                     Number of Guests *
                 </label>
-                <input type="number" id="guests-${id}" value="${booking.NumberOfGuests}" min="1"
+                <input type="number" id="guests-${id}" value="${booking.NumberOfGuests}" min="1" max="${booking.tableCapacity}"
                     class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 font-bold text-lg" />
             </div>
 
@@ -599,13 +611,13 @@ function editBooking(id) {
 
         <input type="hidden" id="hiddenBookingDateTime-${id}" value="${booking.StartTime}" />
 
-        <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-blue-200">
+        <div class="flex flex-col md:flex-row justify-end md:space-x-3 space-y-3 md:space-y-0 mt-6 pt-4 border-t border-blue-200 w-full">
             <button onclick="cancelEditBooking(${id}, '${booking.NumberOfGuests}', '${booking.StartTime}')"
-                class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium flex items-center shadow-md">
+                class="bg-gray-500 hover:bg-gray-600 text-white px-4 md:px-6 py-3 rounded-lg font-medium flex items-center justify-center shadow-md w-full md:w-auto">
                 <i class="fas fa-times mr-2"></i>Cancel
             </button>
             <button onclick="saveBooking(${id})"
-                class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium flex items-center shadow-md">
+                class="bg-green-500 hover:bg-green-600 text-white px-4 md:px-6 py-3 rounded-lg font-medium flex items-center justify-center shadow-md w-full md:w-auto">
                 <i class="fas fa-save mr-2"></i>Save Changes
             </button>
         </div>
@@ -722,39 +734,48 @@ async function saveBooking(id) {
         li.dataset.start = startTime;
 
         li.innerHTML = `
-        <div class="booking-display flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <div class="bg-blue-100 p-3 rounded-lg">
-                    <i class="fas fa-user text-blue-600 text-xl"></i>
-                </div>
-                <div>
-                    <h4 class="font-bold text-lg text-gray-900">${li.dataset.customer}</h4>
-                    <div class="flex flex-wrap text-gray-600 mt-1 space-x-4">
-                        <span>
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            ${new Date(startTime).toLocaleString('en-GB', {
-                                day: '2-digit',
-                                month: 'short',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                hour12: false
-                            })}
-                        </span>
-                        <span><i class="fas fa-chair mr-1"></i>Table: ${tableId}</span>
-                        <span><i class="fas fa-users mr-1"></i>Guests: ${guests}</span>
+        <div class="group bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 hover:border-blue-300 rounded-xl p-3 sm:p-5 transition-all duration-200 hover:shadow-md"
+             data-customer="${li.dataset.customer}"
+             data-customerid="${li.dataset.customerid}"
+             data-guests="${guests}"
+             data-start="${startTime}"
+             data-table="${tableId}"
+             data-capacity="${li.dataset.capacity}">
+     
+            <div class="booking-display flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
+                <div class="flex items-center space-x-3 sm:space-x-4">
+                    <div class="bg-blue-100 p-3 rounded-lg flex-shrink-0">
+                        <i class="fas fa-user text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg text-gray-900">${li.dataset.customer}</h4>
+                        <div class="flex flex-wrap text-gray-600 mt-1 gap-2 sm:gap-4 text-sm sm:text-base">
+                            <span>
+                                <i class="fas fa-calendar-alt mr-1"></i>
+                                ${new Date(startTime).toLocaleString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false
+                })}
+                            </span>
+                            <span><i class="fas fa-chair mr-1"></i>Table: ${tableId}</span>
+                            <span><i class="fas fa-users mr-1"></i>Guests: ${guests}</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="flex space-x-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <button onclick="editBooking(${id})"
-                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium flex items-center">
-                    <i class="fas fa-edit mr-2"></i>Edit
-                </button>
-                <button onclick="deleteBooking(${id})"
-                    class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium flex items-center">
-                    <i class="fas fa-trash mr-2"></i>Delete
-                </button>
+                <div class="flex space-x-2 sm:space-x-3 justify-end md:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <button onclick="editBooking(${id})"
+                        class="bg-blue-500 hover:bg-blue-600 grow md:grow-0 text-white px-3 sm:px-4 py-2 rounded-lg font-medium flex items-center text-sm sm:text-base">
+                        <i class="fas fa-edit mr-1 sm:mr-2"></i>Edit
+                    </button>
+                    <button onclick="deleteBooking(${id})"
+                        class="bg-red-500 hover:bg-red-600 grow md:grow-0 text-white px-3 sm:px-4 py-2 rounded-lg font-medium flex items-center text-sm sm:text-base">
+                        <i class="fas fa-trash mr-1 sm:mr-2"></i>Delete
+                    </button>
+                </div>
             </div>
         </div>`;
     } else {
@@ -767,41 +788,50 @@ function cancelEditBooking(id, originalGuests, originalStart) {
     const li = document.getElementById(`booking-${id}`);
 
     li.innerHTML = `
-    <div class="booking-display flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-            <div class="bg-blue-100 p-3 rounded-lg">
-                <i class="fas fa-user text-blue-600 text-xl"></i>
-            </div>
-            <div>
-                <h4 class="font-bold text-lg text-gray-900">${li.dataset.customer}</h4>
-                <div class="flex flex-wrap text-gray-600 mt-1 space-x-4">
-                    <i class="fas fa-calendar-alt mr-1"></i>
-                        ${new Date(originalStart).toLocaleString('en-GB', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: false
-                        })}
-                    </span>
-                    <span><i class="fas fa-chair mr-1"></i>Table: ${li.dataset.table}</span>
-                    <span><i class="fas fa-users mr-1"></i>Guests: ${originalGuests}</span>
+    <div class="group bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 hover:border-blue-300 rounded-xl p-3 sm:p-5 transition-all duration-200 hover:shadow-md"
+         data-customer="${li.dataset.customer}"
+         data-customerid="${li.dataset.customerid}"
+         data-guests="${originalGuests}"
+         data-start="${originalStart}"
+         data-table="${li.dataset.table}"
+         data-capacity="${li.dataset.capacity}">
+     
+        <div class="booking-display flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
+            <div class="flex items-center space-x-3 sm:space-x-4">
+                <div class="bg-blue-100 p-3 rounded-lg flex-shrink-0">
+                    <i class="fas fa-user text-blue-600 text-xl"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg text-gray-900">${li.dataset.customer}</h4>
+                    <div class="flex flex-wrap text-gray-600 mt-1 gap-2 sm:gap-4 text-sm sm:text-base">
+                        <span>
+                            <i class="fas fa-calendar-alt mr-1"></i>
+                            ${new Date(originalStart).toLocaleString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false
+        })}
+                        </span>
+                        <span><i class="fas fa-chair mr-1"></i>Table: ${li.dataset.table}</span>
+                        <span><i class="fas fa-users mr-1"></i>Guests: ${originalGuests}</span>
+                    </div>
                 </div>
             </div>
+            <div class="flex space-x-2 sm:space-x-3 justify-end md:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <button onclick="editBooking(${id})"
+                    class="bg-blue-500 hover:bg-blue-600 grow md:grow-0 text-white px-3 sm:px-4 py-2 rounded-lg font-medium flex items-center text-sm sm:text-base">
+                    <i class="fas fa-edit mr-1 sm:mr-2"></i>Edit
+                </button>
+                <button onclick="deleteBooking(${id})"
+                    class="bg-red-500 hover:bg-red-600 grow md:grow-0 text-white px-3 sm:px-4 py-2 rounded-lg font-medium flex items-center text-sm sm:text-base">
+                    <i class="fas fa-trash mr-1 sm:mr-2"></i>Delete
+                </button>
+            </div>
         </div>
-        <div class="flex space-x-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <button onclick="editBooking(${id})"
-                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium flex items-center">
-                <i class="fas fa-edit mr-2"></i>Edit
-            </button>
-            <button onclick="deleteBooking(${id})"
-                class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium flex items-center">
-                <i class="fas fa-trash mr-2"></i>Delete
-            </button>
-        </div>
-    </div>
-    `;
+    </div>`;
 }
 
 
@@ -864,6 +894,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function editMenuItem(id) {
     const div = document.getElementById(`menuitem-${id}`);
 
+    // Read dataset dynamically
     const menuItem = {
         name: div.dataset.name,
         description: div.dataset.description,
@@ -873,89 +904,109 @@ function editMenuItem(id) {
     };
 
     div.innerHTML = `
-        <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h4 class="text-lg font-bold text-blue-900 flex items-center">
-                    <i class="fas fa-edit mr-2"></i>Edit Menu Item
-                </h4>
-                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                    ID: ${id}
-                </span>
-            </div>
+    <div class="bg-green-50 border-2 border-green-200 rounded-xl p-3 sm:p-6 transition-all duration-200 hover:shadow-md">
+        
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 space-y-2 sm:space-y-0">
+            <h4 class="text-lg sm:text-xl font-bold text-green-900 flex items-center">
+                <i class="fas fa-edit mr-2"></i>Edit Menu Item
+            </h4>
+            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
+                ID: ${id}
+            </span>
+        </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fas fa-signature mr-2 text-blue-600"></i>Item Name *
-                        </label>
-                        <input type="text" id="name-${id}" value="${menuItem.name}" placeholder="Enter item name"
-                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 font-medium" />
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fas fa-align-left mr-2 text-blue-600"></i>Description
-                        </label>
-                        <textarea id="description-${id}" placeholder="Enter item description" rows="3"
-                                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 resize-none">${menuItem.description || ''}</textarea>
-                    </div>
-
-                    <!-- Popular Toggle -->
-                    <div class="flex items-center space-x-3">
-                        <label class="flex items-center cursor-pointer">
-                            <span class="mr-2 text-gray-700 font-semibold">Popular</span>
-                            <input type="checkbox" id="popular-${id}" ${menuItem.isPopular ? "checked" : ""} 
-                                   class="w-5 h-5 text-yellow-500 border-gray-300 rounded focus:ring-yellow-200 focus:ring-2" />
-                        </label>
-                    </div>
+        <!-- Form Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <!-- Left Column -->
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-signature mr-2 text-green-600"></i>Item Name *
+                    </label>
+                    <input type="text" id="name-${id}" value="${menuItem.name}" placeholder="Enter item name"
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 font-medium" />
                 </div>
 
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fas fa-dollar-sign mr-2 text-green-600"></i>Price *
-                        </label>
-                        <div class="relative">
-                            <input type="number" id="price-${id}" value="${menuItem.price.replace(',', '.')}"
-                                   step="1" min="0" placeholder="0"
-                                   class="w-full px-4 py-3 pl-8 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 font-bold text-green-700" />
-                            <span class="absolute left-3 top-3.5 text-green-600 font-bold">kr</span>
-                        </div>
-                    </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-align-left mr-2 text-green-600"></i>Description
+                    </label>
+                    <textarea id="description-${id}" placeholder="Enter item description" rows="3"
+                              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 resize-none">${menuItem.description || ''}</textarea>
+                </div>
 
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fas fa-image mr-2 text-purple-600"></i>Image URL
-                        </label>
-                        <input type="url" id="image-${id}" value="${menuItem.image || ''}" placeholder="https://example.com/image.jpg"
-                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200" />
-                        <p class="text-xs text-gray-500 mt-1">Optional: Add a URL to display an image</p>
-                    </div>
+                <!-- Popular Toggle -->
+                <div class="flex items-center space-x-3">
+                    <label class="flex items-center cursor-pointer">
+                        <span class="mr-2 text-gray-700 font-semibold">Popular</span>
+                        <input type="checkbox" id="popular-${id}" ${menuItem.isPopular ? "checked" : ""} 
+                               class="w-5 h-5 text-yellow-500 border-gray-300 rounded focus:ring-yellow-200 focus:ring-2" />
+                    </label>
                 </div>
             </div>
 
-            <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-blue-200">
-                <button onclick="cancelEditMenuItem(${id}, '${menuItem.name}', '${menuItem.description}', ${menuItem.price}, '${menuItem.image || ''}', ${menuItem.isPopular})"
-                        class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center shadow-md hover:shadow-lg">
-                    <i class="fas fa-times mr-2"></i>Cancel
-                </button>
-                <button onclick="saveMenuItem(${id})"
-                        class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center shadow-md hover:shadow-lg">
-                    <i class="fas fa-save mr-2"></i>Save Changes
-                </button>
+            <!-- Right Column -->
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-dollar-sign mr-2 text-green-600"></i>Price *
+                    </label>
+                    <div class="relative">
+                        <input type="number" id="price-${id}" value="${menuItem.price.replace(',', '.')}"
+                               step="1" min="0" placeholder="0"
+                               class="w-full px-4 py-3 pl-8 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 font-bold text-green-700" />
+                        <span class="absolute left-3 top-3.5 text-green-600 font-bold">kr</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-image mr-2 text-purple-600"></i>Image URL
+                    </label>
+                    <input type="url" id="image-${id}" value="${menuItem.image || ''}" placeholder="https://example.com/image.jpg"
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200" />
+                    <p class="text-xs text-gray-500 mt-1">Optional: Add a URL to display an image</p>
+                    <img id="preview-${id}" src="${menuItem.image || ''}" alt="Image preview" class="mt-2 w-full max-h-32 sm:max-h-48 object-contain rounded-lg shadow-sm ${menuItem.image ? '' : 'hidden'}" />
+                </div>
             </div>
         </div>
+
+        <!-- Footer Actions -->
+        <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 mt-6 pt-4 border-t border-green-200">
+            <button onclick="cancelEditMenuItem(${id}, '${menuItem.name}', '${menuItem.description}', ${menuItem.price}, '${menuItem.image || ''}', ${menuItem.isPopular})"
+                    class="bg-gray-500 hover:bg-gray-600 text-white px-4 md:px-6 py-3 rounded-lg font-medium flex items-center justify-center shadow-md w-full md:w-auto">
+                <i class="fas fa-times mr-2"></i>Cancel
+            </button>
+            <button onclick="saveMenuItem(${id})"
+                    class="bg-green-500 hover:bg-green-600 text-white px-4 md:px-6 py-3 rounded-lg font-medium flex items-center justify-center shadow-md w-full md:w-auto">
+                <i class="fas fa-save mr-2"></i>Save Changes
+            </button>
+        </div>
+    </div>
     `;
+
+    // Add live image preview functionality
+    const imageInput = document.getElementById(`image-${id}`);
+    const previewImg = document.getElementById(`preview-${id}`);
+    imageInput.addEventListener('input', () => {
+        if (imageInput.value.trim()) {
+            previewImg.src = imageInput.value;
+            previewImg.classList.remove('hidden');
+        } else {
+            previewImg.src = '';
+            previewImg.classList.add('hidden');
+        }
+    });
 }
+
 
 async function saveMenuItem(id) {
     const div = document.getElementById(`menuitem-${id}`);
     const name = document.getElementById(`name-${id}`).value.trim();
     const description = document.getElementById(`description-${id}`).value.trim();
-    const price = parseFloat(document.getElementById(`price-${id}`).value);
-    console.log(price);
-    console.log(price.replace(",", "."))
+    const rawPrice = document.getElementById(`price-${id}`).value;
+    const price = parseFloat(rawPrice.replace(",", "."));
     const image = document.getElementById(`image-${id}`).value.trim();
     const isPopular = document.getElementById(`popular-${id}`).checked;
 
@@ -986,51 +1037,57 @@ async function saveMenuItem(id) {
         });
 
         if (response.ok) {
+            // Update dataset
             div.dataset.name = name;
             div.dataset.description = description;
             div.dataset.price = price;
             div.dataset.image = image;
             div.dataset.popular = isPopular;
 
-            // Re-render menu item display (optional: show a "Popular" badge)
+            // Render updated menu item with the same card styling
             div.innerHTML = `
-                <div class="menuitem-display flex items-start justify-between group">
-                    <div class="flex space-x-4 flex-1">
-                        ${image ?
-                                `<div class="flex-shrink-0">
-                            <img src="${image}" alt="${name}" class="w-20 h-20 object-cover rounded-lg border-2 border-gray-200" />
-                        </div>` :
-                                `<div class="flex-shrink-0">
-                            <div class="w-20 h-20 bg-green-100 rounded-lg flex items-center justify-center border-2 border-gray-200">
-                                <i class="fas fa-image text-green-600 text-2xl"></i>
-                            </div>
-                        </div>`
-                            }
-                        <div class="flex-1 min-w-0">
-                            <h4 class="font-bold text-lg text-gray-900 mb-1 flex items-center space-x-2">
-                                <span>${name}</span>
-                                ${isPopular ? `<span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full text-xs font-bold">Popular</span>` : ''}
-                            </h4>
-                            <p class="text-gray-600 text-sm mb-2 line-clamp-2">${description}</p>
-                            <div class="flex items-center space-x-4">
-                                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full font-bold text-sm">
-                                    ${price.toFixed(2)} kr
-                                </span>
-                            </div>
+            <div class="menuitem-display flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
+                <div class="flex space-x-3 sm:space-x-4 flex-1">
+                    ${image
+                    ? `<div class="flex-shrink-0">
+                                <img src="${image}" alt="${name}" class="w-20 h-20 object-cover rounded-lg border-2 border-gray-200" />
+                           </div>`
+                    : `<div class="flex-shrink-0">
+                                <div class="w-20 h-20 bg-green-100 rounded-lg flex items-center justify-center border-2 border-gray-200">
+                                    <i class="fas fa-image text-green-600 text-2xl"></i>
+                                </div>
+                           </div>`
+                }
+
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-bold text-lg text-gray-900 mb-1 flex items-center space-x-2">
+                            <span>${name}</span>
+                            ${isPopular ? `<span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full text-xs font-semibold">Popular!</span>` : ''}
+                        </h4>
+
+                        <p class="text-gray-600 text-sm mb-2 line-clamp-2">${description}</p>
+
+                        <div class="flex items-center space-x-2 sm:space-x-4 mt-1">
+                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full font-bold text-sm">
+                                ${price.toFixed(2)} kr
+                            </span>
                         </div>
                     </div>
-                    <div class="flex space-x-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-4">
-                        <button onclick="editMenuItem(${id})"
-                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
-                            <i class="fas fa-edit mr-2"></i>Edit
-                        </button>
-                        <button onclick="deleteMenuItem(${id})"
-                                class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
-                            <i class="fas fa-trash mr-2"></i>Delete
-                        </button>
-                    </div>
                 </div>
+
+                <div class="flex space-x-2 sm:space-x-3 justify-end md:opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-0 sm:ml-4">
+                    <button onclick="editMenuItem(${id})"
+                        class="bg-blue-500 hover:bg-blue-600 grow md:grow-0 text-white px-3 sm:px-4 py-2 rounded-lg font-medium flex items-center text-sm sm:text-base">
+                        <i class="fas fa-edit mr-1 sm:mr-2"></i>Edit
+                    </button>
+                    <button onclick="deleteMenuItem(${id})"
+                        class="bg-red-500 hover:bg-red-600 grow md:grow-0 text-white px-3 sm:px-4 py-2 rounded-lg font-medium flex items-center text-sm sm:text-base">
+                        <i class="fas fa-trash mr-1 sm:mr-2"></i>Delete
+                    </button>
+                </div>
+            </div>
             `;
+
             showNotification('Menu item updated successfully!', 'success');
         } else {
             const data = await response.json();
@@ -1046,42 +1103,43 @@ async function saveMenuItem(id) {
     }
 }
 
+
 function cancelEditMenuItem(id, originalName, originalDescription, originalPrice, originalImage, originalPopularity) {
     const div = document.getElementById(`menuitem-${id}`);
     div.innerHTML = `
-        <div class="menuitem-display flex items-start justify-between group">
-            <div class="flex space-x-4 flex-1">
+        <div class="menuitem-display flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
+            <div class="flex space-x-3 sm:space-x-4 flex-1">
                 ${originalImage ?
             `<div class="flex-shrink-0">
-                    <img src="${originalImage}" alt="${originalName}" class="w-20 h-20 object-cover rounded-lg border-2 border-gray-200" />
-                </div>` :
+                        <img src="${originalImage}" alt="${originalName}" class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg border-2 border-gray-200" />
+                   </div>` :
             `<div class="flex-shrink-0">
-                    <div class="w-20 h-20 bg-green-100 rounded-lg flex items-center justify-center border-2 border-gray-200">
-                        <i class="fas fa-image text-green-600 text-2xl"></i>
-                    </div>
-                </div>`
+                        <div class="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-lg flex items-center justify-center border-2 border-gray-200">
+                            <i class="fas fa-image text-green-600 text-xl sm:text-2xl"></i>
+                        </div>
+                   </div>`
         }
                 <div class="flex-1 min-w-0">
                     <h4 class="font-bold text-lg text-gray-900 mb-1 flex items-center space-x-2">
                         <span>${originalName}</span>
-                        ${originalPopularity ? `<span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full text-xs font-semibold">Popular!</span>` : ''}
+                        ${originalPopularity ? `<span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full text-xs font-semibold mt-1 sm:mt-0 self-start sm:self-auto">Popular!</span>` : ''}
                     </h4>
                     <p class="text-gray-600 text-sm mb-2 line-clamp-2">${originalDescription}</p>
-                    <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2 sm:space-x-4">
                         <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full font-bold text-sm">
                             ${parseFloat(originalPrice).toFixed(2)} kr
                         </span>
                     </div>
                 </div>
             </div>
-            <div class="flex space-x-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-4">
+            <div class="flex space-x-2 sm:space-x-3 justify-end md:opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-0 sm:ml-4">
                 <button onclick="editMenuItem(${id})"
-                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
-                    <i class="fas fa-edit mr-2"></i>Edit
+                        class="bg-blue-500 hover:bg-blue-600 grow md:grow-0 text-white px-3 sm:px-4 py-2 rounded-lg font-medium flex items-center text-sm sm:text-base">
+                    <i class="fas fa-edit mr-1 sm:mr-2"></i>Edit
                 </button>
                 <button onclick="deleteMenuItem(${id})"
-                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
-                    <i class="fas fa-trash mr-2"></i>Delete
+                        class="bg-red-500 hover:bg-red-600 grow md:grow-0 text-white px-3 sm:px-4 py-2 rounded-lg font-medium flex items-center text-sm sm:text-base">
+                    <i class="fas fa-trash mr-1 sm:mr-2"></i>Delete
                 </button>
             </div>
         </div>
@@ -1130,48 +1188,48 @@ function editTable(id) {
     };
 
     div.innerHTML = `
-                <div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h4 class="text-lg font-bold text-yellow-900 flex items-center">
-                            <i class="fas fa-edit mr-2"></i>Edit Table
-                        </h4>
-                        <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
-                            ID: ${id}
-                        </span>
-                    </div>
+        <div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-3 sm:p-6 transition-all duration-200 hover:shadow-md">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 space-y-2 sm:space-y-0">
+                <h4 class="text-lg sm:text-xl font-bold text-yellow-900 flex items-center">
+                    <i class="fas fa-edit mr-2"></i>Edit Table
+                </h4>
+                <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
+                    ID: ${id}
+                </span>
+            </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                <i class="fas fa-hashtag mr-2 text-yellow-600"></i>Table Number *
-                            </label>
-                            <input type="number" id="tablenumber-${id}" value="${table.tableNumber}" min="1" placeholder="1"
-                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 font-bold text-lg" />
-                            <p class="text-xs text-gray-500 mt-1">Unique table identifier</p>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                <i class="fas fa-users mr-2 text-yellow-600"></i>Seating Capacity *
-                            </label>
-                            <input type="number" id="capacity-${id}" value="${table.capacity}" min="1" max="20" placeholder="4"
-                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 font-bold text-lg" />
-                            <p class="text-xs text-gray-500 mt-1">Maximum number of guests (1-20)</p>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-yellow-200">
-                        <button onclick="cancelEditTable(${id}, ${table.tableNumber}, ${table.capacity})"
-                                class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center shadow-md hover:shadow-lg">
-                            <i class="fas fa-times mr-2"></i>Cancel
-                        </button>
-                        <button onclick="saveTable(${id})"
-                                class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center shadow-md hover:shadow-lg">
-                            <i class="fas fa-save mr-2"></i>Save Changes
-                        </button>
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-hashtag mr-2 text-yellow-600"></i>Table Number *
+                    </label>
+                    <input type="number" id="tablenumber-${id}" value="${table.tableNumber}" min="1" placeholder="1"
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 font-bold text-lg" />
+                    <p class="text-xs text-gray-500 mt-1">Unique table identifier</p>
                 </div>
-            `;
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-users mr-2 text-yellow-600"></i>Seating Capacity *
+                    </label>
+                    <input type="number" id="capacity-${id}" value="${table.capacity}" min="1" max="20" placeholder="4"
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 font-bold text-lg" />
+                    <p class="text-xs text-gray-500 mt-1">Maximum number of guests (1-20)</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 mt-6 pt-4 border-t border-yellow-200">
+                <button onclick="cancelEditTable(${id}, ${table.tableNumber}, ${table.capacity})"
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 md:px-6 py-3 rounded-lg font-medium flex items-center justify-center shadow-md w-full md:w-auto">
+                    <i class="fas fa-times mr-2"></i>Cancel
+                </button>
+                <button onclick="saveTable(${id})"
+                        class="bg-green-500 hover:bg-green-600 text-white px-4 md:px-6 py-3 rounded-lg font-medium flex items-center justify-center shadow-md w-full md:w-auto">
+                    <i class="fas fa-save mr-2"></i>Save Changes
+                </button>
+            </div>
+        </div>
+    `;
 }
 
 async function saveTable(id) {
@@ -1209,31 +1267,29 @@ async function saveTable(id) {
             div.dataset.capacity = capacity;
 
             div.innerHTML = `
-                        <div class="table-display flex items-center justify-between">
-                            <div class="flex items-center space-x-4">
-                                <div class="bg-yellow-100 p-3 rounded-lg">
-                                    <i class="fas fa-chair text-yellow-600 text-xl"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-lg text-gray-900">Table ${tableNumber}</h4>
-                                    <div class="flex items-center text-gray-600 mt-1">
-                                        <i class="fas fa-users mr-2 text-sm"></i>
-                                        <span>Capacity: ${capacity} seats</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex space-x-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                <button onclick="editTable(${id})"
-                                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
-                                    <i class="fas fa-edit mr-2"></i>Edit
-                                </button>
-                                <button onclick="deleteTable(${id})"
-                                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
-                                    <i class="fas fa-trash mr-2"></i>Delete
-                                </button>
-                            </div>
+            <div class="table-display flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0 group">
+                <div class="flex items-center space-x-3 sm:space-x-4">
+                    <div class="bg-yellow-100 p-3 rounded-lg flex-shrink-0">
+                        <i class="fas fa-chair text-yellow-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg text-gray-900">Table ${tableNumber}</h4>
+                        <div class="flex flex-wrap text-gray-600 mt-1 gap-2 sm:gap-4 text-sm sm:text-base">
+                            <span><i class="fas fa-users mr-1"></i>Capacity: ${capacity} seats</span>
                         </div>
-                    `;
+                    </div>
+                </div>
+                <div class="flex space-x-2 sm:space-x-3 justify-end md:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <button onclick="editTable(${id})"
+                            class="bg-blue-500 hover:bg-blue-600 grow md:grow-0 text-white px-3 sm:px-4 py-2 rounded-lg font-medium flex items-center text-sm sm:text-base">
+                        <i class="fas fa-edit mr-1 sm:mr-2"></i>Edit
+                    </button>
+                    <button onclick="deleteTable(${id})"
+                            class="bg-red-500 hover:bg-red-600 grow md:grow-0 text-white px-3 sm:px-4 py-2 rounded-lg font-medium flex items-center text-sm sm:text-base">
+                        <i class="fas fa-trash mr-1 sm:mr-2"></i>Delete
+                    </button>
+                </div>
+            </div>`;
             showNotification('Table updated successfully!', 'success');
         } else {
             const data = await response.json();
@@ -1252,33 +1308,31 @@ async function saveTable(id) {
 function cancelEditTable(id, originalTableNumber, originalCapacity) {
     const div = document.getElementById(`table-${id}`);
     div.innerHTML = `
-                <div class="table-display flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                        <div class="bg-yellow-100 p-3 rounded-lg">
-                            <i class="fas fa-chair text-yellow-600 text-xl"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-lg text-gray-900">Table ${originalTableNumber}</h4>
-                            <div class="flex items-center text-gray-600 mt-1">
-                                <i class="fas fa-users mr-2 text-sm"></i>
-                                <span>Capacity: ${originalCapacity} seats</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex space-x-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <button onclick="editTable(${id})"
-                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
-                            <i class="fas fa-edit mr-2"></i>Edit
-                        </button>
-                        <button onclick="deleteTable(${id})"
-                                class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
-                            <i class="fas fa-trash mr-2"></i>Delete
-                        </button>
+        <div class="table-display flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
+            <div class="flex items-center space-x-3 sm:space-x-4">
+                <div class="bg-yellow-100 p-3 rounded-lg flex-shrink-0">
+                    <i class="fas fa-chair text-yellow-600 text-xl"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg text-gray-900">Table ${originalTableNumber}</h4>
+                    <div class="flex flex-wrap text-gray-600 mt-1 gap-2 sm:gap-4 text-sm sm:text-base">
+                        <span><i class="fas fa-users mr-1"></i>Capacity: ${originalCapacity} seats</span>
                     </div>
                 </div>
-            `;
+            </div>
+            <div class="flex space-x-2 sm:space-x-3 justify-end md:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <button onclick="editTable(${id})"
+                        class="bg-blue-500 hover:bg-blue-600 grow md:grow-0 text-white px-3 sm:px-4 py-2 rounded-lg font-medium flex items-center text-sm sm:text-base">
+                    <i class="fas fa-edit mr-1 sm:mr-2"></i>Edit
+                </button>
+                <button onclick="deleteTable(${id})"
+                        class="bg-red-500 hover:bg-red-600 grow md:grow-0 text-white px-3 sm:px-4 py-2 rounded-lg font-medium flex items-center text-sm sm:text-base">
+                    <i class="fas fa-trash mr-1 sm:mr-2"></i>Delete
+                </button>
+            </div>
+        </div>
+    `;
 }
-
 async function deleteTable(id) {
     if (!confirm("Are you sure you want to delete this table? This may affect existing bookings.")) return;
 

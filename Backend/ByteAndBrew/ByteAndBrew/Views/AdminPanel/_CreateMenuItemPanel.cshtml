@@ -68,7 +68,7 @@
                 class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center">
             <i class="fas fa-save mr-2"></i>
             <span>Add Menu Item</span>
-            <i class="fas fa-spinner fa-spin ml-2 hidden" id="submit-spinner"></i>
+            <i class="fas fa-spinner fa-spin ml-2 !hidden" id="submit-spinner"></i>
         </button>
         <button type="button"
                 onclick="closeQuickForm(this)"
@@ -94,7 +94,7 @@
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             submitBtn.disabled = true;
-            spinner.classList.remove('hidden');
+            spinner.classList.remove('!hidden');
 
             // Clear previous messages
             errorBox.classList.add('hidden');

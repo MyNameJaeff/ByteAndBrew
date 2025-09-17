@@ -2,6 +2,7 @@
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Admin Dashboard";
+    ViewData["Description"] = "A dashboard page for the admins of Byte & Brew allowing CRUD of database items";
 }
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -29,7 +30,7 @@
     </div>
 
     <!-- Container for dynamic panels -->
-    <div id="management-panel" class="max-w-7xl mx-auto px-1 sm:px-6 lg:px-8 mb-12"></div>
+    <div id="management-panel" class="hidden md:block max-w-7xl mx-auto px-1 sm:px-6 lg:px-8 mb-12"></div>
 
     <!-- Quick Actions -->
     @await Html.PartialAsync("_QuickActions")

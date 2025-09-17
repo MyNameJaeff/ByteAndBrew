@@ -45,6 +45,7 @@ namespace ByteAndBrew.Controllers
             {
                 return RedirectToAction("Login");
             }
+
             return RedirectToAction("Dashboard");
         }
 
@@ -55,6 +56,7 @@ namespace ByteAndBrew.Controllers
             {
                 return RedirectToAction("Dashboard");
             }
+
             return View(new AdminLoginDto());
         }
 
