@@ -953,7 +953,9 @@ async function saveMenuItem(id) {
     const div = document.getElementById(`menuitem-${id}`);
     const name = document.getElementById(`name-${id}`).value.trim();
     const description = document.getElementById(`description-${id}`).value.trim();
-    const price = parseFloat(document.getElementById(`price-${id}`).value).replace(",", ".");
+    const price = parseFloat(document.getElementById(`price-${id}`).value);
+    console.log(price);
+    console.log(price.replace(",", "."))
     const image = document.getElementById(`image-${id}`).value.trim();
     const isPopular = document.getElementById(`popular-${id}`).checked;
 
