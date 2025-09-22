@@ -114,6 +114,19 @@ namespace ByteAndBrew
                 });
             });
 
+            // Add CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowReactDev",
+                    policy =>
+                    {
+                        policy
+                            .WithOrigins("http://localhost:5173") // React dev server
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                    });
+            });
+
             builder.Services.AddAuthorization();
             builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
             builder.Services.AddEndpointsApiExplorer();
@@ -135,6 +148,7 @@ namespace ByteAndBrew
                 app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
+            app.UseCors("AllowReactDev");
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

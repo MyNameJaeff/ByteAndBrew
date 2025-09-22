@@ -1,9 +1,12 @@
 ﻿using ByteAndBrew.Data;
 using ByteAndBrew.Dtos.Booking;
+using ByteAndBrew.Dtos.Customer;
+using ByteAndBrew.Dtos.Table;
 using ByteAndBrew.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http;
 
 namespace ByteAndBrew.Controllers
 {
@@ -109,6 +112,76 @@ namespace ByteAndBrew.Controllers
                 NumberOfGuests = dto.NumberOfGuests,
                 TableId = dto.TableId,
                 CustomerId = dto.CustomerId
+            };
+
+            _db.Bookings.Add(booking);
+            await _db.SaveChangesAsync();
+
+            var readDto = new BookingReadDto
+            {
+                Id = booking.Id,
+                StartTime = booking.StartTime,
+                NumberOfGuests = booking.NumberOfGuests,
+                TableId = booking.TableId,
+                CustomerId = booking.CustomerId
+            };
+
+            return CreatedAtAction(nameof(Get), new { id = booking.Id }, readDto);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("customerAndBooking")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CreateBooking([FromBody] BookingAndCustomerCreateDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                return BadRequest(new { errors });
+            }
+
+            if (model.StartTime <= DateTime.Now)
+                return BadRequest(new { errors = new[] { "Booking time must be in the future." } });
+
+            if (model.NumberOfGuests <= 0)
+                return BadRequest(new { errors = new[] { "Number of guests must be greater than 0." } });
+
+            // Validate table exists
+            var table = await _db.Tables.FindAsync(model.TableId);
+            if (table == null)
+                return BadRequest(new { errors = new[] { "Selected table does not exist." } });
+
+            if (model.NumberOfGuests > table.Capacity)
+                return BadRequest(new { errors = new[] { $"Number of guests ({model.NumberOfGuests}) exceeds table capacity ({table.Capacity})." } });
+
+            // Check for booking conflicts
+            if (await HasBookingConflict(model.TableId, model.StartTime, null))
+                return BadRequest(new { errors = new[] { "Selected time slot is no longer available." } });
+
+            // Find or create customer
+            var customer = await _db.Customers.FirstOrDefaultAsync(c => c.PhoneNumber == model.PhoneNumber.Trim());
+            if (customer == null)
+            {
+                customer = new Customer
+                {
+                    Name = model.Name.Trim(),
+                    PhoneNumber = model.PhoneNumber.Trim()
+                };
+                _db.Customers.Add(customer);
+                await _db.SaveChangesAsync();
+            }
+
+            // Create booking
+            var booking = new Booking
+            {
+                StartTime = model.StartTime,
+                NumberOfGuests = model.NumberOfGuests,
+                TableId = model.TableId,
+                CustomerId = customer.Id
             };
 
             _db.Bookings.Add(booking);
