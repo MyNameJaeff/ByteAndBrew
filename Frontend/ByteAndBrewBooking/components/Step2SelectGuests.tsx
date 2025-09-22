@@ -118,7 +118,7 @@ export default function Step2SelectGuests() {
         <h3 className="font-medium text-gray-800 mb-2">Party Size Information</h3>
         <div className="space-y-2 text-sm text-gray-600">
           <p>• Maximum party size: 12 people</p>
-          <p>• Large parties (12+) may have limited seating options</p>
+          <p>• Large parties (11+) may have limited seating options</p>
           <p>• High chairs available for children upon request</p>
         </div>
       </div>

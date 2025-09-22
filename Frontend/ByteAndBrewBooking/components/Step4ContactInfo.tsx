@@ -15,7 +15,7 @@ export default function Step4ContactInfo() {
   };
 
   const validatePhone = (value: string) => {
-    const cleanPhone = value.replace(/\D/g, '');
+    const cleanPhone = value.replace(/[-\D]/g, '');
     if (!cleanPhone) return 'Phone number is required';
     if (cleanPhone.length < 10) return 'Phone number must be at least 10 digits';
     return '';

@@ -1,9 +1,8 @@
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../app/store";
-import { resetBooking } from "../features/bookingSlice";
-import { useState } from "react";
+import { resetBooking, updateBooking } from "../features/bookingSlice";
+import { useState, useEffect } from "react";
 
-// Define the DTO type for booking and customer creation
 type BookingAndCustomerCreateDto = {
   StartTime: string;
   NumberOfGuests: number;
@@ -17,18 +16,35 @@ export default function Step5Confirm() {
   const dispatch = useDispatch();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [confirmationId, setConfirmationId] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState(15);
+  const [autoReset, setAutoReset] = useState(true);
+
+  // countdown effect
+  useEffect(() => {
+    if (!isConfirmed || !autoReset) return;
+
+    if (countdown === 0) {
+      dispatch(resetBooking());
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isConfirmed, countdown, autoReset, dispatch]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const months = ['January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'];
-
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
   };
 
   const generateBookingId = () => {
-    return 'BK' + Date.now().toString().slice(-6) + Math.floor(Math.random() * 100).toString().padStart(2, '0');
+    return "BK" + Date.now().toString().slice(-6) + Math.floor(Math.random() * 100).toString().padStart(2, "0");
   };
 
   const handleConfirm = async () => {
@@ -39,17 +55,8 @@ export default function Step5Confirm() {
 
     setIsSubmitting(true);
 
-    // Convert date + time to a single ISO string
     const localDate = new Date(`${booking.date}T${booking.time}`);
     const startTime = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000).toISOString();
-
-    console.log("Submitting booking:", {
-      StartTime: startTime,
-      NumberOfGuests: booking.guests,
-      TableId: booking.table,
-      Name: booking.name,
-      PhoneNumber: booking.phone,
-    });
 
     const dto: BookingAndCustomerCreateDto = {
       StartTime: startTime,
@@ -60,13 +67,15 @@ export default function Step5Confirm() {
     };
 
     try {
-      const response = await fetch("https://localhost:7145/api/Bookings/customerAndBooking", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(dto),
-      });
+      // force minimum wait (800ms)
+      const [response] = await Promise.all([
+        fetch("https://localhost:7145/api/Bookings/customerAndBooking", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dto),
+        }),
+        new Promise((resolve) => setTimeout(resolve, 800)), // artificial delay
+      ]);
 
       const data = await response.json();
 
@@ -74,13 +83,11 @@ export default function Step5Confirm() {
         console.error("Booking API error:", data);
         alert(data.errors?.join("\n") || "Failed to create booking");
       } else {
-        console.log("Booking confirmed:", data);
         setIsConfirmed(true);
-
-        // Auto-reset after showing confirmation
-        setTimeout(() => {
-          dispatch(resetBooking());
-        }, 15000);
+        setCountdown(15);
+        setAutoReset(true);
+        setConfirmationId(generateBookingId());
+        dispatch(updateBooking({ submitted: true }));
       }
     } catch (err) {
       console.error("Booking API exception:", err);
@@ -90,143 +97,150 @@ export default function Step5Confirm() {
     }
   };
 
-
   if (isConfirmed) {
     return (
       <div className="text-center space-y-6">
-        <div className="text-6xl">🎉</div>
-        <h2 className="text-3xl font-bold text-green-600">Booking Confirmed!</h2>
+        <div className="text-6xl mb-4">🎉</div>
+        <h2 className="text-2xl sm:text-3xl font-bold text-green-600">
+          Booking Confirmed!
+        </h2>
+
         <div className="bg-green-50 border border-green-200 rounded-lg p-6 max-w-md mx-auto">
-          <p className="text-green-800 font-medium mb-2">Confirmation Details</p>
-          <p className="text-green-700 text-sm">
-            Booking ID: <span className="font-mono font-bold">{generateBookingId()}</span>
+          <p className="text-green-800 font-medium mb-2">Confirmation ID</p>
+          <p className="text-green-900 font-mono font-bold text-xl">
+            {confirmationId}
           </p>
-          <p className="text-green-700 text-sm mt-2">
+          <p className="text-green-700 text-sm mt-3">
             A confirmation text will be sent to {booking.phone}
           </p>
         </div>
-        <p className="text-gray-600">
-          Thank you {booking.name}! We look forward to seeing you.
+
+        <p className="text-gray-700">
+          Thank you <span className="font-semibold">{booking.name}</span>! We look forward to seeing you.
         </p>
-        <p className="text-sm text-gray-500">
-          This page will reset in a few seconds...
-        </p>
+
+        {autoReset ? (
+          <p className="text-sm text-gray-500">
+            This page will reset in <span className="font-semibold">{countdown}</span> seconds...
+          </p>
+        ) : (
+          <p className="text-sm text-gray-500">Auto reset stopped ✅</p>
+        )}
+
+        {autoReset && (
+          <button
+            onClick={() => setAutoReset(false)}
+            className="cursor-pointer mt-3 px-6 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium"
+          >
+            Stop Auto-Reload
+          </button>
+        )}
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Confirm Your Reservation</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
+          Confirm Your Reservation
+        </h2>
         <p className="text-gray-600">Please review your booking details</p>
       </div>
 
-      {/* Booking Summary Card */}
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
-          <span>📋</span>
-          <span>Booking Summary</span>
+      {/* Booking Summary */}
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 sm:p-6">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <span className="mr-2">📋</span>
+          Booking Summary
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-3">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm">
-                📅
-              </div>
-                <div>
-                <p className="text-sm font-medium text-gray-700">Date</p>
-                <p className="text-gray-900">
-                  {formatDate(booking.date)} <br />
-                  {booking.time} &ndash; {(() => {
-                  const date = new Date(`${booking.date}T${booking.time}`);
-                  date.setHours(date.getHours() + 2);
-                  return date.toTimeString().slice(0, 5);
-                  })()}
-                </p>
-                </div>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm">
-                👥
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Date & Time */}
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm font-medium text-gray-500 mb-1">📅 Date</p>
+                <p className="text-gray-900">{formatDate(booking.date)}</p>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-700">Party Size</p>
-                <p className="text-gray-900">{booking.guests} {booking.guests === 1 ? 'guest' : 'guests'}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm">
-                👤
+                <p className="text-sm font-medium text-gray-500 mb-1">⏰ Time</p>
+                <p className="text-gray-900">{booking.time}</p>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-700">Name</p>
+                <p className="text-sm font-medium text-gray-500 mb-1">🍽️ Table</p>
+                <p className="text-gray-900">Table #{booking.table}</p>
+              </div>
+            </div>
+
+            {/* Contact & Party Info */}
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm font-medium text-gray-500 mb-1">🙍 Name</p>
                 <p className="text-gray-900">{booking.name}</p>
               </div>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white text-sm">
-                📞
+              <div>
+                <p className="text-sm font-medium text-gray-500 mb-1">📱 Phone</p>
+                <p className="text-gray-900">{booking.phone}</p>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-700">Phone</p>
-                <p className="text-gray-900">{booking.phone}</p>
+                <p className="text-sm font-medium text-gray-500 mb-1">👥 Party Size</p>
+                <p className="text-gray-900">
+                  {booking.guests} {booking.guests === 1 ? "guest" : "guests"}
+                </p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Additional Information */}
+      {/* Important Information */}
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-        <h4 className="font-medium text-amber-800 mb-2 flex items-center space-x-2">
-          <span>💡</span>
-          <span>Important Information</span>
+        <h4 className="font-medium text-amber-800 mb-3 flex items-center">
+          <span className="mr-2">💡</span>
+          Important Information
         </h4>
-        <div className="space-y-1 text-sm text-amber-700">
-          <p>• Please arrive 5-10 minutes before your desired time</p>
-          <p>• Tables are held for 15 minutes past reservation time</p>
-          <p>• Contact us at (555) 123-4567 if you need to make changes</p>
-        </div>
+        <ul className="space-y-1 text-sm text-amber-700">
+          <li>• Please arrive 5-10 minutes before your reservation time</li>
+          <li>• Tables are held for 15 minutes past reservation time</li>
+          <li>
+            • Contact us at <span className="font-medium">(555) 123-4567</span> if you need to make changes
+          </li>
+        </ul>
       </div>
 
       {/* Confirmation Button */}
-      <div className="text-center">
+      <div className="text-center pt-2">
         <button
-          className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform ${isSubmitting
-            ? 'bg-gray-400 text-white cursor-not-allowed'
-            : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 hover:scale-105 shadow-lg hover:shadow-xl'
+          className={`cursor-pointer w-full sm:w-auto px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 ${isSubmitting
+            ? "bg-gray-400 text-white cursor-not-allowed"
+            : "bg-green-600 text-white hover:bg-green-700 shadow-sm hover:shadow-md"
             }`}
           onClick={handleConfirm}
           disabled={isSubmitting}
         >
           {isSubmitting ? (
-            <div className="flex items-center space-x-2">
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              <span>Confirming Reservation...</span>
-            </div>
+            <span className="flex items-center justify-center">
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-3"></div>
+              Confirming...
+            </span>
           ) : (
-            <div className="flex items-center space-x-2">
-              <span>✓</span>
-              <span>Confirm Booking</span>
-            </div>
+            <span className="flex items-center justify-center">
+              <span className="mr-2">✓</span>
+              Confirm Booking
+            </span>
           )}
         </button>
       </div>
 
-      {/* Terms and Conditions */}
+      {/* Terms */}
       <div className="text-center text-sm text-gray-500">
         <p>
-          By confirming this reservation, you agree to our{' '}
-          <button className="text-blue-500 hover:underline">cancellation policy</button>
-          {' '}and{' '}
-          <button className="text-blue-500 hover:underline">terms of service</button>.
+          By confirming this reservation, you agree to our{" "}
+          <button className="text-blue-600 hover:underline cursor-pointer">cancellation policy</button>{" "}
+          and{" "}
+          <button className="text-blue-600 hover:underline cursor-pointer">terms of service</button>.
         </p>
       </div>
     </div>

@@ -10,6 +10,7 @@ interface BookingState {
   guests: number;
   name: string;
   phone: string;
+  submitted?: boolean;
 }
 
 const initialState: BookingState = {
@@ -20,6 +21,7 @@ const initialState: BookingState = {
   guests: 1,
   name: "",
   phone: "",
+  submitted: false,
 };
 
 const bookingSlice = createSlice({

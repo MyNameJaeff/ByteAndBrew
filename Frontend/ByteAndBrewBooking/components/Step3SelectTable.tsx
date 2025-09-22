@@ -23,6 +23,10 @@ export default function Step3SelectTable() {
     useEffect(() => {
         if (!booking.date || !booking.time || !booking.guests) return;
 
+        if(booking.table > 0 && !selectedTable){
+            setSelectedTable(booking.table);
+        }
+
         const fetchTables = async () => {
             setLoading(true);
             setError(null);
@@ -46,6 +50,8 @@ export default function Step3SelectTable() {
             } catch (err: any) {
                 setError(err.message || "Something went wrong");
             } finally {
+                // simulate network delay for better UX
+                await new Promise((r) => setTimeout(r, 500));
                 setLoading(false);
             }
         };
@@ -62,7 +68,32 @@ export default function Step3SelectTable() {
         <div className="space-y-6">
             <h2 className="text-xl font-semibold text-gray-700">Select a Table</h2>
 
-            {loading && <p className="text-gray-500">Loading available tables...</p>}
+            {loading && (
+                <div className="flex justify-center items-center py-10">
+                    <svg
+                        className="animate-spin h-12 w-12 text-blue-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                        />
+                        <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                        />
+                    </svg>
+                </div>
+            )}
+
+
             {error && <p className="text-red-500">{error}</p>}
             {!loading && !error && availableTables.length === 0 && (
                 <p className="text-gray-500">No tables available for this date/time.</p>
