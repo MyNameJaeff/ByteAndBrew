@@ -11,6 +11,12 @@ type BookingAndCustomerCreateDto = {
   PhoneNumber: string;
 };
 
+type ApiError = {
+  errors?: string[];
+  message?: string;
+  title?: string;
+};
+
 export default function Step5Confirm() {
   const booking = useSelector((state: RootState) => state.booking);
   const dispatch = useDispatch();
@@ -19,6 +25,8 @@ export default function Step5Confirm() {
   const [confirmationId, setConfirmationId] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(15);
   const [autoReset, setAutoReset] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   // countdown effect
   useEffect(() => {
@@ -37,64 +45,196 @@ export default function Step5Confirm() {
   }, [isConfirmed, countdown, autoReset, dispatch]);
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        throw new Error("Invalid date");
+      }
+      const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+    } catch {
+      return dateString; // Fallback to original string if parsing fails
+    }
   };
 
   const generateBookingId = () => {
     return "BK" + Date.now().toString().slice(-6) + Math.floor(Math.random() * 100).toString().padStart(2, "0");
   };
 
+  const validateBookingData = (): string | null => {
+    if (!booking.date) return "Please select a date";
+    if (!booking.time) return "Please select a time";
+    if (!booking.table) return "Please select a table";
+    if (!booking.name?.trim()) return "Please enter your name";
+    if (!booking.phone?.trim()) return "Please enter your phone number";
+    if (!booking.guests || booking.guests < 1) return "Please specify number of guests";
+    
+    // Additional validation
+    const phoneRegex = /^\+?[\d\s\-\(\)]{10,}$/;
+    if (!phoneRegex.test(booking.phone.trim())) {
+      return "Please enter a valid phone number";
+    }
+
+    return null;
+  };
+
+  const parseApiError = (error: any): string => {
+    // Handle different error response formats
+    if (typeof error === 'string') return error;
+    
+    if (error?.errors) {
+      if (Array.isArray(error.errors)) {
+        return error.errors.join('\n');
+      }
+      if (typeof error.errors === 'object') {
+        // Handle validation errors like { "Name": ["Name is required"], "Phone": ["Invalid format"] }
+        const errorMessages = Object.values(error.errors).flat().join('\n');
+        return errorMessages || 'Validation failed';
+      }
+    }
+    
+    if (error?.message) return error.message;
+    if (error?.title) return error.title;
+    
+    return 'An unexpected error occurred';
+  };
+
   const handleConfirm = async () => {
-    if (!booking.date || !booking.time || !booking.table || !booking.name || !booking.phone) {
-      alert("Please complete all booking details before confirming.");
+    // Clear previous errors
+    setError(null);
+
+    // Validate booking data
+    const validationError = validateBookingData();
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
     setIsSubmitting(true);
 
-    const localDate = new Date(`${booking.date}T${booking.time}`);
-    const startTime = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000).toISOString();
-
-    const dto: BookingAndCustomerCreateDto = {
-      StartTime: startTime,
-      NumberOfGuests: booking.guests,
-      TableId: booking.table,
-      Name: booking.name,
-      PhoneNumber: booking.phone,
-    };
-
     try {
-      // force minimum wait (800ms)
-      const [response] = await Promise.all([
-        fetch("https://localhost:7145/api/Bookings/customerAndBooking", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(dto),
-        }),
-        new Promise((resolve) => setTimeout(resolve, 800)), // artificial delay
-      ]);
+      // Convert date/time to ISO string with timezone handling
+      const localDate = new Date(`${booking.date}T${booking.time}`);
+      if (isNaN(localDate.getTime())) {
+        throw new Error("Invalid date or time format");
+      }
+      
+      const startTime = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000).toISOString();
 
-      const data = await response.json();
+      const dto: BookingAndCustomerCreateDto = {
+        StartTime: startTime,
+        NumberOfGuests: booking.guests,
+        TableId: booking.table,
+        Name: booking.name!.trim(),
+        PhoneNumber: booking.phone!.trim(),
+      };
 
-      if (!response.ok) {
-        console.error("Booking API error:", data);
-        alert(data.errors?.join("\n") || "Failed to create booking");
-      } else {
+      // Add timeout to fetch request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+      try {
+        // Force minimum wait (800ms) and make API call
+        const [response] = await Promise.all([
+          fetch("https://localhost:7145/api/Bookings/customerAndBooking", {
+            method: "POST",
+            headers: { 
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            },
+            body: JSON.stringify(dto),
+            signal: controller.signal
+          }),
+          new Promise((resolve) => setTimeout(resolve, 800))
+        ]);
+
+        clearTimeout(timeoutId);
+
+        // Handle different response scenarios
+        if (!response.ok) {
+          let errorData: ApiError;
+          const contentType = response.headers.get("content-type");
+          
+          if (contentType?.includes("application/json")) {
+            try {
+              errorData = await response.json();
+            } catch {
+              errorData = { message: `HTTP ${response.status}: ${response.statusText}` };
+            }
+          } else {
+            errorData = { message: `HTTP ${response.status}: ${response.statusText}` };
+          }
+
+          // Handle specific HTTP status codes
+          switch (response.status) {
+            case 400:
+              throw new Error(parseApiError(errorData) || "Invalid booking data. Please check your information.");
+            case 409:
+              throw new Error("This time slot is no longer available. Please select a different time.");
+            case 422:
+              throw new Error(parseApiError(errorData) || "The booking data is invalid. Please review your information.");
+            case 500:
+              throw new Error("Server error. Please try again in a moment.");
+            case 503:
+              throw new Error("Service temporarily unavailable. Please try again later.");
+            default:
+              throw new Error(parseApiError(errorData) || `Request failed with status ${response.status}`);
+          }
+        }
+
+        // Parse successful response
+        let data;
+        try {
+          data = await response.json();
+        } catch {
+          // If response is ok but no JSON, assume success
+          data = {};
+        }
+
+        // Success - show confirmation
         setIsConfirmed(true);
         setCountdown(15);
         setAutoReset(true);
         setConfirmationId(generateBookingId());
+        setRetryCount(0); // Reset retry count on success
         dispatch(updateBooking({ submitted: true }));
+
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId);
+        
+        if (fetchError.name === 'AbortError') {
+          throw new Error("Request timed out. Please check your connection and try again.");
+        }
+        
+        throw fetchError; // Re-throw to be handled by outer catch
       }
-    } catch (err) {
-      console.error("Booking API exception:", err);
-      alert("Failed to connect to the server. Please try again.");
+
+    } catch (err: any) {
+      console.error("Booking submission error:", err);
+      
+      // Set user-friendly error message
+      if (err.message) {
+        setError(err.message);
+      } else if (err.name === 'TypeError' && err.message?.includes('fetch')) {
+        setError("Unable to connect to the server. Please check your internet connection and try again.");
+      } else {
+        setError("Failed to submit booking. Please try again.");
+      }
+      
+      setRetryCount(prev => prev + 1);
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleRetry = () => {
+    setError(null);
+    handleConfirm();
+  };
+
+  const dismissError = () => {
+    setError(null);
   };
 
   if (isConfirmed) {
@@ -148,6 +288,41 @@ export default function Step5Confirm() {
         </h2>
         <p className="text-gray-600">Please review your booking details</p>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <span className="text-red-400 text-xl">⚠️</span>
+            </div>
+            <div className="ml-3 flex-1">
+              <h4 className="text-red-800 font-medium mb-1">Booking Failed</h4>
+              <p className="text-red-700 text-sm whitespace-pre-line">{error}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  onClick={handleRetry}
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? "Retrying..." : "Try Again"}
+                </button>
+                <button
+                  onClick={dismissError}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md text-sm font-medium hover:bg-gray-300"
+                >
+                  Dismiss
+                </button>
+                {retryCount > 0 && (
+                  <span className="text-red-600 text-sm self-center">
+                    Attempt {retryCount + 1}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Booking Summary */}
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 sm:p-6">
@@ -213,10 +388,11 @@ export default function Step5Confirm() {
       {/* Confirmation Button */}
       <div className="text-center pt-2">
         <button
-          className={`cursor-pointer w-full sm:w-auto px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 ${isSubmitting
-            ? "bg-gray-400 text-white cursor-not-allowed"
-            : "bg-green-600 text-white hover:bg-green-700 shadow-sm hover:shadow-md"
-            }`}
+          className={`cursor-pointer w-full sm:w-auto px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 ${
+            isSubmitting
+              ? "bg-gray-400 text-white cursor-not-allowed"
+              : "bg-green-600 text-white hover:bg-green-700 shadow-sm hover:shadow-md"
+          }`}
           onClick={handleConfirm}
           disabled={isSubmitting}
         >
